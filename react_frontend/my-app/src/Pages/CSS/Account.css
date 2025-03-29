@@ -9,6 +9,12 @@
     overflow: hidden; /* Prevent scrolling */
 }
 
+.welcome-msg{
+    margin-bottom: 20px;
+    font-size: 2rem;
+    font-family: 'Courier New', Courier, monospace;
+}
+
 .friends-bar, .right-bar {
     display: flex;
     flex-direction: column;
