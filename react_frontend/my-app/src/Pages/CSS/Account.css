@@ -1,0 +1,71 @@
+.account-main {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%; /* Ensure it takes up the full width of the parent */
+    height: calc(100vh - 64px); /* Full viewport height minus navbar height */
+    margin-top: 0; /* Remove any default margin */
+    padding-top: 0; /* Remove any default padding */
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.friends-bar, .right-bar {
+    display: flex;
+    flex-direction: column;
+    width: 25%; /* Each takes exactly 1/4 of the screen */
+    height: 100%;
+    padding: 20px;
+    overflow-y: auto; /* Allow scrolling within sections if content overflows */
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.single-friend {
+    width: 100%;
+}
+
+.middle-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertically center the content */
+    align-items: center; /* Horizontally center the content */
+    width: 50%; /* Middle section takes exactly half (2/4) of the screen */
+    height: 100%; /* Ensure it takes the full height of the container */
+    text-align: center;
+    overflow-y: auto; /* Allow scrolling if needed */
+}
+
+.middle-text {
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 20px; /* Space between the text and buttons */
+    font-size: 7vmin; /* Responsive font size based on viewport */
+    max-width: 90%; /* Prevent text from getting too wide */
+}
+
+.generate-button,
+.create-pose-button {
+    margin: 10px 0; /* Add some space between buttons */
+}
+
+/* Optional: Style the buttons better */
+.generate-button button,
+.create-pose-button button {
+    padding: 10px 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    background-color: white;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.generate-button button:hover, 
+.create-pose-button button:hover {
+    background-color: blue;
+    color: white;
+}
+
+/* Add this to your body or root element to prevent page scrolling */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
