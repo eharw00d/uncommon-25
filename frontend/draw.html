@@ -15,7 +15,19 @@
 
 <body onload="init()">
     <div class="container">
-        <div id="grid-container"></div>
+        <canvas id="pixel-grid" width="1280" height="720"></canvas>
+    </div>
+
+    <br><br>
+
+    <div class="container">
+        <button id="reset">Erase All</button>
+        <button id="eraser">Erase</button>
+        <button id="undo">Undo</button>
+        <button id="size-1">Small Brush</button>
+        <button id="size-3">Medium Brush</button>
+        <button id="size-8">Large Brush</button>
+        <button id="post">Post</button>
     </div>
 
     <script type="text/javascript" src="draw-scripts.js"></script>

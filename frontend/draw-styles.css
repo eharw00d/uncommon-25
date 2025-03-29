@@ -10,22 +10,9 @@ References:
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 10px;
 }
 
-#grid-container {
-    display: grid;
-    grid-template-columns: repeat(64, 30px);
-    grid-template-rows: repeat(64, 30px);
-    margin-right: 20px;
-    grid-gap:0px;
-}
-
-.grid-item {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+canvas {
     cursor: crosshair;
-    background-color: #000000; /* Default color */
 }
