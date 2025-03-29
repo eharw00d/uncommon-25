@@ -2,7 +2,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
 import cv2
-import sys
+import sys, math
 
 
 HEIGHT = 1080
@@ -30,6 +30,7 @@ POLYGON_REGIONS = {
     "right_arm": ["right_shoulder", "right_elbow", "right_wrist"],
     "left_leg": ["left_hip", "left_knee", "left_ankle"],
     "right_leg": ["right_hip", "right_knee", "right_ankle"],
+
     "head": ["left_ear", "right_ear", "nose"]
 }
 
@@ -57,14 +58,13 @@ def draw_prediction_on_image(image, keypoints_with_scores, threshold=0.3):
 def draw_pixel_frames(image):
     height, width, _ = image.shape
     for idx1 in range(width):
-        if (idx1 % 60 == 0):
-            cv2.line(image, (idx1, 0), (idx1, HEIGHT), (0,0,0), 2)
-             
-    for idx2 in range(height):
-        if (idx2 % 60 == 0):
-            cv2.line(image, (0, idx2), (WIDTH, idx2), (0,0,0), 2)
-    return image
+        if (idx1 % 120 == 0):
+            cv2.line(image, (idx1, 0), (idx1, HEIGHT), (100,100,100), 2)
 
+    for idx2 in range(height):
+        if (idx2 % 120 == 0):
+            cv2.line(image, (0, idx2), (WIDTH, idx2), (100,100,100), 2)
+    return image
 
 def check_frames(image):
     ...
@@ -89,17 +89,103 @@ def poly(image, keypoints, threshold=0.3):
     #draw torso
     torso_pts = [named_keypoints[pt] for pt in POLYGON_REGIONS["torso"] if pt in named_keypoints]
     if len(torso_pts) >= 3:
-        cv2.fillPoly(image, [np.array(torso_pts, dtype=np.int32)], color=(100, 100, 100))
+        cv2.fillPoly(image, [np.array(torso_pts, dtype=np.int32)], color=(256, 256, 256))
 
-    #draw top
-    uptr_pts = [named_keypoints[pt] for pt in POLYGON_REGIONS["upper_torso"] if pt in named_keypoints]
-    if len(uptr_pts) >= 3:
-        cv2.fillPoly(image, [np.array(uptr_pts, dtype=np.int32)], color=(100, 100, 100))
+    # #draw top
+    # uptr_pts = [named_keypoints[pt] for pt in POLYGON_REGIONS["upper_torso"] if pt in named_keypoints]
+    # if len(uptr_pts) >= 3:
+    #     cv2.fillPoly(image, [np.array(uptr_pts, dtype=np.int32)], color=(256, 256, 256))
+
+    face_circle = [named_keypoints[pt] for pt in POLYGON_REGIONS["head"] if pt in named_keypoints]
+    if "nose" in named_keypoints and ("left_ear" in named_keypoints or "right_ear" in named_keypoints):
+        outer_face_point = named_keypoints.get("left_ear") or named_keypoints.get("right_ear")
+        nose_point = named_keypoints["nose"]
+        radius = int(math.dist(nose_point, outer_face_point))
+        cv2.circle(image, nose_point, radius, (256, 256, 256), -1)
+
+    for shoulder, elbow in [("left_shoulder", "left_elbow"), ("right_shoulder", "right_elbow")]:
+        if shoulder in named_keypoints and elbow in named_keypoints:
+            x1, y1 = named_keypoints[shoulder]
+            x2, y2 = named_keypoints[elbow]
+            v = np.array([x2 - x1, y2 - y1])
+            v_norm = v / np.linalg.norm(v)
+            perp = np.array([-v_norm[1], v_norm[0]])
+            box_width = 0.2 * np.linalg.norm(v)
+            offset = perp * box_width / 2
+
+            p1 = np.array([x1, y1]) + offset
+            p2 = np.array([x1, y1]) - offset
+            p3 = np.array([x2, y2]) - offset
+            p4 = np.array([x2, y2]) + offset
+
+            box_pts = np.array([p1, p2, p3, p4], dtype=np.int32).reshape((-1, 1, 2))
+            cv2.fillPoly(image, [box_pts], color=(256, 256, 256))
+
+    for elbow, wrist in [("left_elbow", "left_wrist"), ("right_elbow", "right_wrist")]:
+            if elbow in named_keypoints and wrist in named_keypoints:
+                x1, y1 = named_keypoints[elbow]
+                x2, y2 = named_keypoints[wrist]
+                v = np.array([x2 - x1, y2 - y1])
+                v_norm = v / np.linalg.norm(v)
+                perp = np.array([-v_norm[1], v_norm[0]])
+                box_width = 0.2 * np.linalg.norm(v)
+                offset = perp * box_width / 2
+
+                p1 = np.array([x1, y1]) + offset
+                p2 = np.array([x1, y1]) - offset
+                p3 = np.array([x2, y2]) - offset
+                p4 = np.array([x2, y2]) + offset
+
+                box_pts = np.array([p1, p2, p3, p4], dtype=np.int32).reshape((-1, 1, 2))
+                cv2.fillPoly(image, [box_pts], color=(256, 256, 256))
+
+    for hip, knee in [("left_hip", "left_knee"), ("right_hip", "right_knee")]:
+        if hip in named_keypoints and knee in named_keypoints:
+            x1, y1 = named_keypoints[hip]
+            x2, y2 = named_keypoints[knee]
+            v = np.array([x2 - x1, y2 - y1])
+            v_norm = v / np.linalg.norm(v)
+            perp = np.array([-v_norm[1], v_norm[0]])
+            box_width = 0.2 * np.linalg.norm(v)
+            offset = perp * box_width / 2
+
+            p1 = np.array([x1, y1]) + offset
+            p2 = np.array([x1, y1]) - offset
+            p3 = np.array([x2, y2]) - offset
+            p4 = np.array([x2, y2]) + offset
+
+            box_pts = np.array([p1, p2, p3, p4], dtype=np.int32).reshape((-1, 1, 2))
+            cv2.fillPoly(image, [box_pts], color=(256, 256, 256))
+
+    for knee, ankle in [("left_knee", "left_ankle"), ("right_knee", "right_ankle")]:
+            if knee in named_keypoints and ankle in named_keypoints:
+                x1, y1 = named_keypoints[knee]
+                x2, y2 = named_keypoints[ankle]
+                v = np.array([x2 - x1, y2 - y1])
+                v_norm = v / np.linalg.norm(v)
+                perp = np.array([-v_norm[1], v_norm[0]])
+                box_width = 0.2 * np.linalg.norm(v)
+                offset = perp * box_width / 2
+
+                p1 = np.array([x1, y1]) + offset
+                p2 = np.array([x1, y1]) - offset
+                p3 = np.array([x2, y2]) - offset
+                p4 = np.array([x2, y2]) + offset
+
+                box_pts = np.array([p1, p2, p3, p4], dtype=np.int32).reshape((-1, 1, 2))
+                cv2.fillPoly(image, [box_pts], color=(256, 256, 256))
+
+
     return image
 
+
+
 if __name__ == "__main__":
-    model_name = "movenet_lightning"
-    input_size = 192
+    model_name = "movenet_thunder"
+    if "thunder" in model_name:
+        input_size = 256
+    elif "lightning" in model_name:
+        input_size = 192
     module = hub.load(f"https://tfhub.dev/google/movenet/singlepose/{model_name.split('_')[1]}/4")
 
     cap = cv2.VideoCapture(0)
@@ -125,12 +211,12 @@ if __name__ == "__main__":
             # Run inference and draw results
             keypoints = movenet(input_image)
 
-            overlay = frame.copy()
+
+
+            overlay = np.zeros_like(frame)
+            overlay = draw_pixel_frames(overlay)
             overlay = draw_prediction_on_image(overlay, keypoints)
             overlay = poly(overlay, keypoints)
-
-
-            frame = draw_pixel_frames(frame)
 
 
             # Show the frame
@@ -147,4 +233,3 @@ if __name__ == "__main__":
         cap.release()
         cv2.destroyAllWindows()
         sys.exit(0)
-    

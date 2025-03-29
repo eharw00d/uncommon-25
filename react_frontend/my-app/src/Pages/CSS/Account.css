@@ -9,6 +9,12 @@
     overflow: hidden; /* Prevent scrolling */
 }
 
+.welcome-msg{
+    margin-bottom: 20px;
+    font-size: 2rem;
+    font-family: 'Courier New', Courier, monospace;
+}
+
 .friends-bar, .right-bar {
     display: flex;
     flex-direction: column;
@@ -18,6 +24,23 @@
     padding-top: 40px;
     overflow-y: auto; /* Allow scrolling within sections if content overflows */
     box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.right-bar{
+    gap: 20px;
+}
+
+.pose-button{
+    font-family: 'Courier New', Courier, monospace;
+    border: 2px solid #333;
+    width: 80.75%;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.pose-button:hover{
+    background-color: #333;
+    color: white;
 }
 
 .friends-bar{

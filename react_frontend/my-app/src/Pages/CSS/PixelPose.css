@@ -1,0 +1,124 @@
+/* 
+Styles for Pixel Pose React Component
+Based on the original styles by Jamie Shiao
+*/
+
+/* Main layout - horizontal layout with canvas and buttons */
+.pixel-pose-layout {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  /* Canvas container */
+  .pixel-pose-canvas-container {
+    flex: 1;
+    max-width: 1280px;
+  }
+  
+  /* Canvas styling */
+  #pixel-grid {
+    cursor: crosshair;
+    border: 1px solid #333;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Controls section on the right */
+  .pixel-pose-controls {
+    min-width: 200px;
+    padding-top: 20px;
+    padding-left: 10px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  /* Group of related controls */
+  .pixel-pose-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+  }
+  
+  /* Group headings */
+  .pixel-pose-control-group h4 {
+    margin: 0 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+    font-family: 'Wonder Boy In Monster World', sans-serif;
+  }
+  
+  /* Button styling */
+  .pixel-pose-button {
+    padding: 8px 12px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Wonder Boy In Monster World', sans-serif;
+    transition: background-color 0.3s;
+    margin-bottom: 5px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  /* Button hover state */
+  .pixel-pose-button:hover {
+    background-color: #555;
+  }
+  
+  /* Button active state */
+  .pixel-pose-button:active {
+    background-color: #222;
+  }
+  
+  /* Style for active state buttons (selected options) */
+  .pixel-pose-button-active {
+    background-color: #4CAF50;
+  }
+  
+  /* Active button hover */
+  .pixel-pose-button-active:hover {
+    background-color: #3e8e41;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 1200px) {
+    .pixel-pose-layout {
+      flex-direction: column;
+    }
+    
+    .pixel-pose-controls {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      gap: 15px;
+      padding-left: 0;
+    }
+    
+    .pixel-pose-control-group {
+      min-width: 150px;
+      flex: 1;
+    }
+  }
+  
+  /* For very small screens */
+  @media (max-width: 600px) {
+    .pixel-pose-controls {
+      flex-direction: column;
+    }
+    
+    .pixel-pose-control-group {
+      width: 100%;
+    }
+  }
