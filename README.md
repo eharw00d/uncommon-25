@@ -1,4 +1,4 @@
-# :dancer: PIXEL POSE :dancer:
+# :man_dancing: PIXEL POSE :man_dancing:
 ## Team RAJE's Uncommon Hacks 25 Submission
 
 ![Members of RAJE](RAJE_members.jpg)
