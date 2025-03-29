@@ -1,0 +1,79 @@
+/* Web Font */
+* {
+    font-family: "Wonder Boy In Monster World", sans-serif;
+    /* The following properties make it so users can't select text,
+       comment out as needed */
+    user-select: none;
+    -khtml-user-select: none;
+    -o-user-select: none;
+    -moz-user-select: -moz-none;
+    -webkit-user-select: none;
+}
+
+body {
+    overflow: hidden;
+    background-color: thistle;
+}
+
+#normalScreen {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    visibility: visible;
+}
+
+#checkInText {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    visibility: hidden;
+}
+
+#greenButton {
+    position: absolute;
+    bottom: 5%;
+    left: 33%;
+}
+
+#redButton {
+    position: absolute;
+    bottom: 5%;
+    right: 33%;
+}
+
+ul {
+    list-style-type: none;
+}
+
+li span {
+    display: inline-block;
+    width: 200px;
+}
+
+button {
+    height: 30px;
+    border: 1px solid #5d544b;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    color: #5D544B;
+    background-color: #ECE8C6;
+    vertical-align: middle;
+}
+
+#nextTaskHeader {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+}
+
+#nextTaskText {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    text-align: right;
+}
