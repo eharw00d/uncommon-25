@@ -97,9 +97,14 @@ def poly(image, keypoints, threshold=0.3):
         cv2.fillPoly(image, [np.array(uptr_pts, dtype=np.int32)], color=(100, 100, 100))
     return image
 
+
+
 if __name__ == "__main__":
-    model_name = "movenet_lightning"
-    input_size = 192
+    model_name = "movenet_thunder"
+    if "thunder" in model_name:
+        input_size = 256
+    elif "lightning" in model_name:
+        input_size = 192
     module = hub.load(f"https://tfhub.dev/google/movenet/singlepose/{model_name.split('_')[1]}/4")
 
     cap = cv2.VideoCapture(0)
@@ -125,12 +130,12 @@ if __name__ == "__main__":
             # Run inference and draw results
             keypoints = movenet(input_image)
 
+
+            frame = draw_pixel_frames(frame)
+
             overlay = frame.copy()
             overlay = draw_prediction_on_image(overlay, keypoints)
             overlay = poly(overlay, keypoints)
-
-
-            frame = draw_pixel_frames(frame)
 
 
             # Show the frame
