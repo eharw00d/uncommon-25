@@ -4,24 +4,13 @@ import './Notifications.css';
 const Notifications = () => {
 
   return (
-    <div className="timer-container">
-        <div className="timer-title">
+    <div className="notifications-container">
+        <div className="notifications-title">
             Notifications
         </div>
-      <div className="minutes-selector">
-        <label htmlFor="minutes">Minutes:</label>
-        <input
-          id="minutes"
-          type="number"
-          min="1"
-          max="60"
-          className="minutes-input"
-        />
-      </div>
-      <div className="timer-display">
-      </div>
-      <div className="timer-controls">
-      </div>
+        <div className="notifications-list">
+          list
+        </div>
     </div>
   );
 };

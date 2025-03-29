@@ -1,4 +1,4 @@
-.timer-container {
+.notifications-container {
     border: 1px solid forestgreen;
     border-radius: 0px;
     padding: 0px;
@@ -8,74 +8,12 @@
     font-family: 'Courier New', Courier, monospace;
   }
 
-  .timer-title {
+  .notifications-title {
     padding: 10px;
     background-color: #729e7c;
     border-bottom: forestgreen;
   }
   
-  .minutes-selector {
-    padding: 12px;
-    display: flex;
-    margin-bottom: 8px;
-    align-items: center;
-  }
-  
-  .minutes-selector label {
-    margin-right: 8px;
-  }
-  
-  .minutes-input {
-    font-family: 'Courier New', Courier, monospace;
-    width: 60px;
-    padding: 4px;
-    border-radius: 0px;
-    border: 1px solid forestgreen;
-  }
-  
-  .timer-display {
-    font-family: 'Press Start 2P', cursive;
-    font-size: 24px;
-    font-weight: bold;
-    text-align: center;
-    margin: 15px 0;
-  }
-  
-  .timer-controls {
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 12px;
-  }
-  
-  .button {
-    border: none;
-    border-radius: 0px;
-    padding: 6px 12px;
-    cursor: pointer;
-    flex: 1;
-  }
-  
-  .start-button {
-    font-family: 'Courier New', Courier, monospace;
-    background-color: #78ae85;
-    color: white;
-    margin-right: 4px;
-    border: 1px solid forestgreen
-  }
-  
-  .pause-button {
-    font-family: 'Courier New', Courier, monospace;
-    background-color: #f7e5af;
-    color: black;
-    border: 1px solid #ffc107;
-    margin-right: 4px;
-  }
-  
-  .reset-button {
-    font-family: 'Courier New', Courier, monospace;
-    background-color: #e4929a;
-    border: 1px solid #dc3545;
-    color: white;
-    margin-left: 4px;
+  .notifications-list{
+    padding: 20px;
   }
