@@ -20,6 +20,23 @@
     box-sizing: border-box; /* Include padding in width calculation */
 }
 
+.right-bar{
+    gap: 20px;
+}
+
+.pose-button{
+    font-family: 'Courier New', Courier, monospace;
+    border: 2px solid #333;
+    width: 80.75%;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.pose-button:hover{
+    background-color: #333;
+    color: white;
+}
+
 .friends-bar{
     padding-left: 40px;
 }
