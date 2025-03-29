@@ -1,3 +1,11 @@
+/*
+Styles for index.html, draw.html (other files go here)
+Written by Jamie Shiao
+References:
+    - links go here
+
+*/
+
 /* Web Font */
 * {
     font-family: "Wonder Boy In Monster World", sans-serif;
@@ -11,7 +19,6 @@
 }
 
 body {
-    overflow: hidden;
     background-color: thistle;
 }
 
