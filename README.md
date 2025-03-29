@@ -4,5 +4,5 @@
 ![Members of RAJE](RAJE_members.jpg)
 Team RAJE Members: Red Atagi, Eric Harwood, Amanda Murphy, Jamie Shiao
 
-## Overview
+## Overview!
 View the final submission post on DevPost [here](link goes here)!
