@@ -4,7 +4,7 @@
     justify-content: space-between;
     width: 100%; /* Ensure it takes up the full width of the parent */
     height: calc(100vh - 64px); /* Full viewport height minus navbar height */
-    margin-top: 0; /* Remove any default margin */
+    margin-top: 20px; /* Remove any default margin */
     padding-top: 0; /* Remove any default padding */
     overflow: hidden; /* Prevent scrolling */
 }
@@ -15,8 +15,13 @@
     width: 25%; /* Each takes exactly 1/4 of the screen */
     height: 100%;
     padding: 20px;
+    padding-top: 40px;
     overflow-y: auto; /* Allow scrolling within sections if content overflows */
     box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.friends-bar{
+    padding-left: 40px;
 }
 
 .single-friend {
@@ -35,31 +40,32 @@
 }
 
 .middle-text {
-    font-family: 'Courier New', Courier, monospace;
-    margin-bottom: 20px; /* Space between the text and buttons */
-    font-size: 7vmin; /* Responsive font size based on viewport */
+    font-family: 'Press Start 2P', cursive;
+    margin-bottom: 30px; /* Space between the text and buttons */
+    font-size: 9vmin; /* Responsive font size based on viewport */
     max-width: 90%; /* Prevent text from getting too wide */
 }
 
 .generate-button,
 .create-pose-button {
-    margin: 10px 0; /* Add some space between buttons */
+    margin: 20px 0; /* Add some space between buttons */
 }
 
 /* Optional: Style the buttons better */
 .generate-button button,
 .create-pose-button button {
-    padding: 10px 30px;
-    border-radius: 20px;
+    padding: 10px 80px;
+    border-radius: 0px;
     cursor: pointer;
-    border: 1px solid #ddd;
-    background-color: white;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    border: 2px solid #333;
+    background-color: rgb(180, 180, 180);
+    font-size: 1.5rem;
+    font-family: 'Courier New';
 }
 
 .generate-button button:hover, 
 .create-pose-button button:hover {
-    background-color: blue;
+    background-color: #333;
     color: white;
 }
 

@@ -2,16 +2,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between; /* This will push items to opposite ends */
-    padding: 16px 24px;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px 40px;
+    border-bottom: 1px solid black;
+    background-color: #dfdfdf;
     position: sticky;
     top: 0;
     z-index: 100;
   }
   
   .navbar-title {
-    font-family: 'Courier Prime', monospace;
+    font-family: 'Press Start 2P', cursive;
     font-size: 24px;
     font-weight: 700;
     color: #333;
@@ -23,9 +23,9 @@
     color: inherit;
   }
   
-  .navbar-title span {
-    color: #4a76fd; /* Highlight the "Pixel" part */
-  }
+  /* .navbar-title span {
+    color: #4a76fd;Highlight the "Pixel" part
+  } */
   
   .login-link {
     margin-left: auto; /* This reinforces pushing the login to the right */
@@ -34,7 +34,19 @@
   .login-link a {
     text-decoration: none;
     color: #333;
-    font-weight: 500;
+    font-weight: bold;
+  }
+
+  .login-link button{
+    font-family:'Courier New', Courier, monospace;
+    border-radius: 0px;
+    border-color: 1px solid navy;
+    padding: 7px 20px;
+  }
+
+  .login-link button:hover{
+    background-color: #333;
+    color: white;
   }
   
   /* Add this in your HTML head to import the font */

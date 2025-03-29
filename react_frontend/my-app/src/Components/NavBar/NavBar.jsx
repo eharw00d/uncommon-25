@@ -9,7 +9,7 @@ const NavBar = () => {
         <Link to='/'><span>_Pixel</span>pose</Link>
       </div>
       <div className="login-link">
-        <Link to="/login">Login</Link>
+        <Link to="/login"><button>Login</button></Link>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import { BrowserRouter,Routes,Route } from 'react-router-dom';
 import Account from './Pages/Account';
 import NavBar from './Components/NavBar/NavBar';
 import Login from './Pages/Login';
+import Camera from './Pages/Camera';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route path='/' element={<Account/>}/>
       <Route path='/login' element={<Login/>}/>
+      <Route path='/camera' element={<Camera/>}></Route>
     </Routes>
     </BrowserRouter>
   );

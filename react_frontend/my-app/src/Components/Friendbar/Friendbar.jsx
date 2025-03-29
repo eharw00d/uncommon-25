@@ -24,6 +24,9 @@ const Friendbar = () => {
 
   return (
     <div className='Friendbar-container'>
+        <div className="friendbar-title">
+            Friends
+        </div>
       <div className='search-container'>
         <input 
           type="text" 
