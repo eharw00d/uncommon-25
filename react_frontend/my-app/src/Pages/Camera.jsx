@@ -60,8 +60,8 @@ const VideoFeed = () => {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   
       try {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixelArray = Array.from(imageData.data);
+        // const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        // const pixelArray = Array.from(imageData.data);
         // console.log(pixelArray);
       } catch (err) {
         console.warn('getImageData failed', err);
@@ -72,49 +72,70 @@ const VideoFeed = () => {
   }, []);
 
   return (
-    <div className="video-container" style={{ textAlign: 'center', padding: '20px' }}>
+    <div className="video-container" style={{ 
+        textAlign: 'center', 
+        padding: '20px',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
       <h1>Live Pose Detection</h1>
 
       {isConnected ? (
-        <div>
+        <div className="content-wrapper" style={{ 
+            maxWidth: '1000px',
+            margin: '40px auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '30px'
+            }}>
+          {/* Left side - Video Feed */}
+          <div className="video-feed">
+            {/* Hidden image stream for MJPEG */}
+            <img
+              ref={imgRef}
+              src={videoUrl}
+              alt="Pose Detection Feed"
+              crossOrigin="anonymous"
+              onError={() => {
+                setIsConnected(false);
+                setErrorMessage(`Unable to load video feed from ${videoUrl}`);
+              }}
+              style={{ display: 'none' }}
+            />
 
-          {/* ⏳ Countdown Timer component */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                <PoseTimer onComplete={() => console.log("Pose timer finished")} />
-            </div>
-
-          {/* Hidden image stream for MJPEG */}
-          <img
-            ref={imgRef}
-            src={videoUrl}
-            alt="Pose Detection Feed"
-            crossOrigin="anonymous"
-            onError={() => {
-              setIsConnected(false);
-              setErrorMessage(`Unable to load video feed from ${videoUrl}`);
-            }}
-            style={{ display: 'none' }}
-          />
-
-          {/* Canvas to draw image + extract pixel data */}
-          <div className="camera-wrapper">
-            <canvas
+            {/* Canvas to draw image + extract pixel data */}
+            <div className="camera-wrapper">
+              <canvas
                 ref={canvasRef}
                 width={320}
                 height={240}
                 className="camera-canvas"
-            />
-            <video
+              />
+              <video
                 className="vhs-overlay-video"
                 src="/vhs-overlay.mp4"
                 autoPlay
                 muted
                 playsInline
-            />
+              />
             </div>
-          <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-            Pixel data from each frame is being logged to the console.
-          </p>
+            
+            <p style={{ marginTop: '10px', fontSize: '14px', color: '#666', textAlign: 'left' }}>
+              Pixel data from each frame is being logged to the console.
+            </p>
+          </div>
+
+          {/* Right side - Timer */}
+          <div className="timer-container" style={{ 
+            width: '280px',
+            marginLeft: '20px',
+            marginTop: '0',
+            display: 'block'
+          }}>
+            <PoseTimer onComplete={() => console.log("Pose timer finished")} />
+          </div>
         </div>
       ) : (
         <div style={{ padding: '40px', background: '#f5f5f5', borderRadius: '8px' }}>
