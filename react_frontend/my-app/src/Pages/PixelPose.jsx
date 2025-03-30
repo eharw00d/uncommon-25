@@ -184,25 +184,27 @@ const PixelPose = () => {
     // Post the drawing (placeholder)
     const handlePost = async () => {
         try {
-            const token = await getAccessTokenSilently(); // Get the Auth0 access token
-
-            const response = await fetch("http://localhost:8080/save-pose", {
+            const response = await fetch("http://localhost:8080/poses", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`, // Attach the correct token to the request
                 },
-                body: JSON.stringify({ drawnPose }), // Send pose data
+                body: JSON.stringify({ 
+                    drawnPose: drawnPose,
+                    createdAt: new Date().toISOString() 
+                }),
             });
-
+    
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-
+    
             const data = await response.json();
-            console.log("Successfully saved pose");
+            console.log("Successfully saved pose:", data);
+            alert("Drawing saved successfully!");
         } catch (error) {
             console.error("Error posting drawing:", error);
+            alert("Failed to save drawing. Check console for details.");
         }
     };
 
