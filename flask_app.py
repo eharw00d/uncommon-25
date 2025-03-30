@@ -3,11 +3,12 @@ import cv2
 import tensorflow as tf
 import numpy as np
 import mediapipe as mp
-import sys, random
+import sys, random, json
 import math
 from flask_cors import CORS
 
 app = Flask(__name__)
+global test_array
 # Configure CORS to allow specific origins (your React app)
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://localhost:3004", "*"]}}, supports_credentials=True)
 
@@ -219,20 +220,39 @@ def draw_scrolling_dots(image):
     return image
 
 
-test_array = [
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]]
+def load_pose_database(filename='db.json'):
+    try:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+        return data
+    except Exception as e:
+        print(f"Error loading pose database: {e}")
+        return None
+
+# Get a random binary pose array from the database
+def get_random_pose_array():
+    data = load_pose_database()
+
+    # Select a random pose from the database
+    random_pose = random.choice(data['poses'])
+    
+    # Extract the drawnPose (binary array)
+    pose_array = random_pose['drawnPose']
+    
+    # Print which pose ID was selected
+    print(f"Selected pose ID: {random_pose['id']}")
+    
+    return pose_array
+
+# Initialize test_array with a random pose from the database
+test_array = get_random_pose_array()
+
 
 
 # game functionality
 def gridcheck(image):
+    global test_array  # Add this line to the beginning of gridcheck
+    
     height, width, _ = image.shape
     grid_size = 120
     grid_color = (0, 200, 0)
@@ -252,8 +272,9 @@ def gridcheck(image):
             y = row * grid_size
 
             # Check corresponding cell in test_array (you might need to scale or adjust based on resolution)
-            test_row = row * len(test_array) // rows
-            test_col = col * len(test_array[0]) // cols
+            test_row = min(row * len(test_array) // rows, len(test_array) - 1)
+            test_col = min(col * len(test_array[0]) // cols, len(test_array[0]) - 1)
+            
             if test_array[test_row][test_col] == 1:  # Color red if the cell value is 1
                 cv2.rectangle(overlay, (x, y), (x + grid_size, y + grid_size), (80, 80, 0), thickness=-1)
 
@@ -284,6 +305,7 @@ def gridcheck(image):
     return image
 
 
+
 # Flask routes for API endpoints
 @app.route('/')
 def index():
@@ -306,8 +328,10 @@ def status():
 
 
 def generate_frames():
-    global frame_counter
+    global frame_counter, test_array
     score_print_interval = 30  # Print score every 30 frames (about once per second at 30fps)
+    pose_change_interval = 30 * 30  # Change pose every 30 seconds (assuming 30fps)
+    
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -344,6 +368,14 @@ def generate_frames():
         # Print score to stdout at specified interval to avoid flooding
         if frame_counter % score_print_interval == 0:
             print(f"Score: {score_data['score']} / {score_data['max_possible']} | Boxes: {score_data['boxes_lit']} / {score_data['total_boxes']}")
+            
+            # Only check for pose change when already printing score to reduce frequency
+            if frame_counter > 0 and frame_counter % pose_change_interval == 0:
+                try:
+                    test_array = get_random_pose_array()
+                    print("Changed to new pose!")
+                except Exception as e:
+                    print(f"Error changing pose: {e}")
 
         final_overlay = cv2.flip(final_overlay, 1)
 
@@ -369,6 +401,7 @@ def generate_frames():
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
 
+
 def get_score(image):
     """
     Calculate score based on highlighted boxes in the image.
@@ -377,8 +410,10 @@ def get_score(image):
         image: The processed image with highlighted boxes
         
     Returns:
-        int: Score calculated as 10 points per test_array box that is lit up by the player
+        dict: Score data including points, boxes lit, etc.
     """
+    global test_array  # This is critical - declare it's using the global variable
+    
     height, width, _ = image.shape
     grid_size = 120
     
@@ -415,8 +450,6 @@ def get_score(image):
         "boxes_lit": score // 10,
         "total_boxes": total_boxes
     }
-    
-    # No need to print here since we're printing in generate_frames
     
     return score_data
 
