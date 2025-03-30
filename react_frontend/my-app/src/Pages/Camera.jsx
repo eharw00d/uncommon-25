@@ -1,70 +1,102 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import './CSS/Camera.css'
 
-const Camera = () => {
+const VideoFeed = () => {
   const [isConnected, setIsConnected] = useState(false);
-  const [error, setError] = useState(null);
-  
-  // Check if backend is running
+  const [retryCount, setRetryCount] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
+  const serverUrl = "http://localhost:8080";
+  const videoUrl = `${serverUrl}/video_feed`;
+
+  // Check if the video stream is available
   useEffect(() => {
-    const checkBackendStatus = async () => {
+    const checkConnection = async () => {
       try {
-        const response = await fetch('http://localhost:3005/status');
+        // Use the status endpoint instead of root
+        const response = await fetch(`${serverUrl}/status`, {
+          mode: 'cors',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
         if (response.ok) {
           setIsConnected(true);
-          setError(null);
+          setErrorMessage('');
         } else {
-          setIsConnected(false);
-          setError('Backend API is not responding correctly');
+          throw new Error(`Server responded with status ${response.status}`);
         }
-      } catch (err) {
+      } catch (error) {
+        console.error("Connection error:", error);
         setIsConnected(false);
-        setError('Could not connect to the backend API. Make sure it is running.');
+        setErrorMessage(`${error.message}. Make sure your Flask server is running at ${serverUrl}`);
+        
+        // Retry connection with exponential backoff
+        if (retryCount < 5) {
+          const timeout = setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+          }, 2000 * Math.pow(1.5, retryCount));
+          
+          return () => clearTimeout(timeout);
+        }
       }
     };
-    
-    checkBackendStatus();
-    // Poll the backend status every 5 seconds
-    const interval = setInterval(checkBackendStatus, 3005);
-    return () => clearInterval(interval);
-  }, []);
+
+    checkConnection();
+  }, [retryCount, serverUrl]);
+
+  // Handle the image load errors
+  const handleImageError = () => {
+    setIsConnected(false);
+    setErrorMessage(`Unable to load video feed from ${videoUrl}`);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">MoveNet Pose Detection</h1>
-      
-      {error && (
-        <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <p><strong>Error:</strong> {error}</p>
-          <p className="text-sm">
-            Make sure you have started the Python backend server with: 
-            <code className="bg-gray-200 px-2 py-1 rounded">python backend_api.py</code>
-          </p>
-        </div>
-      )}
+    <div className="video-container" style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>Live Pose Detection</h1>
       
       {isConnected ? (
-        <div className="relative w-full border-4 border-gray-300 rounded-lg overflow-hidden">
-          {/* Using an img tag with src set to the video feed endpoint */}
-          <img 
-            src="http://localhost:3005/video_feed" 
-            alt="MoveNet Pose Detection" 
-            className="w-full"
+        <div>
+          <img
+            src={videoUrl}
+            alt="Pose Detection Video Feed"
+            onError={handleImageError}
+            style={{ 
+              width: '80%', 
+              maxWidth: '2000px', 
+              border: '2px solid #333',
+              borderRadius: '8px',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+            }}
           />
-          <div className="absolute bottom-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm">
-            Connected
-          </div>
+          <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+            Stand in front of the camera to detect your pose.
+          </p>
         </div>
       ) : (
-        <div className="bg-gray-200 w-full h-80 flex items-center justify-center rounded-lg">
-          <p className="text-gray-600">Waiting for camera feed...</p>
+        <div style={{ padding: '40px', background: '#f5f5f5', borderRadius: '8px' }}>
+          <h2>Connecting to video server...</h2>
+          <p>
+            {retryCount >= 5 
+              ? "Maximum connection attempts reached."
+              : `Attempting to connect (try ${retryCount + 1}/5)...`}
+          </p>
+          <p style={{ color: 'red' }}>{errorMessage}</p>
+          <div style={{ marginTop: '20px', textAlign: 'left', background: '#eee', padding: '15px', borderRadius: '5px' }}>
+            <h3>Troubleshooting Steps:</h3>
+            <ol>
+              <li>Make sure your Flask server is running with: <code>python app.py</code></li>
+              <li>Check that Flask is running on port 8080</li>
+              <li>Verify that your webcam is connected and accessible</li>
+              <li>Check for any errors in your Flask server console</li>
+              <li>Try refreshing this page</li>
+            </ol>
+          </div>
         </div>
       )}
-      
-      <div className="mt-4 text-gray-700">
-        <p>Press the 'q' key in the terminal window running the Python script to exit.</p>
-      </div>
     </div>
   );
 };
 
-export default Camera;
+export default VideoFeed;
