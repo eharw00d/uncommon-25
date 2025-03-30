@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CSS/Camera.css';
+import PoseTimer from '../Components/PoseTimer/PoseTimer.jsx';
 
 const VideoFeed = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -12,6 +13,7 @@ const VideoFeed = () => {
   const serverUrl = "http://localhost:8080";
   const videoUrl = `${serverUrl}/video_feed`;
 
+  // Server connection check
   useEffect(() => {
     const checkConnection = async () => {
       try {
@@ -47,6 +49,7 @@ const VideoFeed = () => {
     checkConnection();
   }, [retryCount]);
 
+  // Image-to-canvas + pixel logging loop
   useEffect(() => {
     const interval = setInterval(() => {
       const img = imgRef.current;
@@ -59,11 +62,11 @@ const VideoFeed = () => {
       try {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixelArray = Array.from(imageData.data);
-        console.log(pixelArray); // ✅ pixel array for each frame
+        console.log(pixelArray); // ✅ live pixel data
       } catch (err) {
-        console.warn('getImageData failed (possibly CORS issue)', err);
+        console.warn('getImageData failed (possibly CORS)', err);
       }
-    }, 100); // every 100ms (≈10fps)
+    }, 100); // ~10fps
 
     return () => clearInterval(interval);
   }, []);
@@ -74,6 +77,13 @@ const VideoFeed = () => {
 
       {isConnected ? (
         <div>
+
+          {/* ⏳ Countdown Timer component */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <PoseTimer onComplete={() => console.log("Pose timer finished")} />
+            </div>
+
+          {/* Hidden image stream for MJPEG */}
           <img
             ref={imgRef}
             src={videoUrl}
@@ -85,17 +95,23 @@ const VideoFeed = () => {
             }}
             style={{ display: 'none' }}
           />
-          <canvas
-            ref={canvasRef}
-            width={640}
-            height={480}
-            style={{
-              border: '2px solid #333',
-              borderRadius: '8px',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-              maxWidth: '100%',
-            }}
-          />
+
+          {/* Canvas to draw image + extract pixel data */}
+          <div className="camera-wrapper">
+            <canvas
+                ref={canvasRef}
+                width={640}
+                height={480}
+                className="camera-canvas"
+            />
+            <video
+                className="vhs-overlay-video"
+                src="/vhs-overlay.mp4"
+                autoPlay
+                muted
+                playsInline
+            />
+            </div>
           <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
             Pixel data from each frame is being logged to the console.
           </p>
@@ -112,7 +128,7 @@ const VideoFeed = () => {
           <div style={{ marginTop: '20px', textAlign: 'left', background: '#eee', padding: '15px', borderRadius: '5px' }}>
             <h3>Troubleshooting Steps:</h3>
             <ol>
-              <li>Make sure your Flask server is running: <code>python app.py</code></li>
+              <li>Make sure Flask is running: <code>python app.py</code></li>
               <li>Ensure Flask is on port <code>8080</code></li>
               <li>Verify your webcam is accessible</li>
               <li>Check the Flask console for errors</li>

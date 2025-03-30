@@ -9,4 +9,38 @@ html, body {
     box-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff;
     background-color: black;
   }
+  h1 {
+    font-family: "Press Start 2P"; 
+  }
+  .camera-wrapper {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    overflow: hidden;
+  }
+  
+  /* canvas = layer 1 */
+  .camera-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  /* video = layer 2 (on top) */
+  .vhs-overlay-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+    pointer-events: none;
+  }
   
