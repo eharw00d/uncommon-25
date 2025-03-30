@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import jsonData from "./poses.json"; // Import JSON file with 2D array
+// import jsonData from "./poses.json"; // Import JSON file with 2D array
 
 const Grid = () => {
   const [grid, setGrid] = useState([]);
