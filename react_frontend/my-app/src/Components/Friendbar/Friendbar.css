@@ -94,3 +94,69 @@
     background-color: navy;
     color: white;
   }
+
+/* Add these styles to your existing Friendbar.css file */
+
+/* Bump popup styling */
+.bump-popup {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border-top: 1px solid navy;
+    z-index: 1000;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-radius: 0px;
+  }
+  
+  .bump-popup-content {
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .bump-popup-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+  
+  .bump-popup-actions {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+  
+  .bump-action-button {
+    font-family: 'Courier New', Courier, monospace;
+    padding: 8px 16px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 0px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .draw-button {
+    background-color: #90d492;
+    border: 1px solid forestgreen;
+    color: forestgreen;
+  }
+  
+  .draw-button:hover {
+    color: white;
+    background-color: #3e8e41;
+  }
+  
+  .random-button {
+    background-color: #8bb2d1;
+    color: navy;
+    border: 1px solid navy;
+  }
+  
+  .random-button:hover {
+    background-color: navy;
+    color: white;
+  }

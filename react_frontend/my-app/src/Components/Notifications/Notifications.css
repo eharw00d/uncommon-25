@@ -1,19 +1,60 @@
 .notifications-container {
-    border: 1px solid forestgreen;
-    border-radius: 0px;
-    padding: 0px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: 80%;
-    background-color: #f8f9fa;
-    font-family: 'Courier New', Courier, monospace;
-  }
+  border: 1px solid forestgreen;
+  border-radius: 0px;
+  padding: 0px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 80%;
+  background-color: #f8f9fa;
+  font-family: 'Courier New', Courier, monospace;
+}
 
-  .notifications-title {
-    padding: 10px;
-    background-color: #729e7c;
-    border-bottom: forestgreen;
-  }
-  
-  .notifications-list{
-    padding: 20px;
-  }
+.notifications-title {
+  padding: 10px;
+  background-color: #729e7c;
+  border-bottom: forestgreen;
+}
+
+.notifications-list {
+  padding: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.no-notifications {
+  color: #888;
+  text-align: center;
+  font-style: italic;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 5px;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.notification-message {
+  flex: 1;
+}
+
+.do-pose-button {
+  background-color: #729e7c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.do-pose-button:hover {
+  background-color: #5a7e64;
+}
