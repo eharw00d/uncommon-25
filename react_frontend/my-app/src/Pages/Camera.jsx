@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CSS/Camera.css';
 import PoseTimer from '../Components/PoseTimer/PoseTimer.jsx';
+import ScoreBoard from '../Components/ScoreBoard/ScoreBoard.jsx';
 
 const VideoFeed = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isGameOver, setIsGameOver] = useState(false);
 
   const imgRef = useRef(null);
   const canvasRef = useRef(null);
@@ -71,6 +73,12 @@ const VideoFeed = () => {
     return () => clearInterval(interval); // ✅ cleanup
   }, []);
 
+  // Handle timer completion
+  const handleTimerComplete = () => {
+    console.log("Pose timer finished");
+    setIsGameOver(true);
+  };
+
   return (
     <div className="video-container" style={{ 
         textAlign: 'center', 
@@ -87,7 +95,7 @@ const VideoFeed = () => {
             margin: '40px auto',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'flex-start', // Changed to align items to the top
             gap: '30px'
             }}>
           {/* Left side - Video Feed */}
@@ -127,14 +135,18 @@ const VideoFeed = () => {
             </p>
           </div>
 
-          {/* Right side - Timer */}
-          <div className="timer-container" style={{ 
+          {/* Right side - Timer and ScoreBoard */}
+          <div className="right-container" style={{ 
             width: '280px',
             marginLeft: '20px',
             marginTop: '0',
-            display: 'block'
+            display: 'flex',
+            flexDirection: 'column'
           }}>
-            <PoseTimer onComplete={() => console.log("Pose timer finished")} />
+            <PoseTimer onComplete={handleTimerComplete} />
+            
+            {/* Add ScoreBoard component below the timer */}
+            <ScoreBoard isGameOver={isGameOver} />
           </div>
         </div>
       ) : (

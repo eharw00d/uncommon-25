@@ -2,16 +2,18 @@ html, body {
     height: 100%;
     overflow: auto;
   }
-
+  
   .video-container img {
     border-radius: 12px;
     border: 2px solid #00f0ff;
     box-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff;
     background-color: black;
   }
+  
   h1 {
     font-family: "Press Start 2P"; 
   }
+  
   .camera-wrapper {
     position: relative;
     width: 640px;
@@ -52,11 +54,12 @@ html, body {
     font-family: 'Courier New', Courier, monospace;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
+  
   .timer-container {
     width: 240px;
     margin: 0 auto;
   }
-
+  
   .pose-feed-wrapper {
     display: flex;
     justify-content: center;
@@ -81,5 +84,150 @@ html, body {
     width: 240px;
   }
   
+  /* ScoreBoard Styles */
+  .score-board {
+    width: 280px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    color: #fff;
+    padding: 15px;
+    margin-top: 20px;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+  }
   
+  .score-section {
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 255, 0, 0.3);
+    padding-bottom: 15px;
+  }
   
+  .score-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  .score-section h2 {
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    color: #0f0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .score-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .main-score {
+    font-size: 30px;
+    font-weight: bold;
+    color: #0f0;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+  }
+  
+  .score-details {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    text-align: right;
+  }
+  
+  .progress-container {
+    width: 100%;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background-color: #0f0;
+    box-shadow: 0 0 5px #0f0;
+    transition: width 0.3s ease;
+  }
+  
+  .final-score {
+    background-color: rgba(255, 255, 0, 0.1);
+    border-radius: 4px;
+    padding: 10px;
+  }
+  
+  .final-score .main-score {
+    font-size: 38px;
+    color: #ff0;
+    text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
+    text-align: center;
+    width: 100%;
+  }
+  
+  .high-scores ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .high-scores li {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 14px;
+    border-bottom: 1px dotted rgba(0, 255, 0, 0.2);
+  }
+  
+  .high-scores li:last-child {
+    border-bottom: none;
+  }
+  
+  .high-scores .rank {
+    min-width: 20px;
+    color: #0f0;
+  }
+  
+  .high-scores .name {
+    flex-grow: 1;
+    padding-left: 5px;
+  }
+  
+  .high-scores .score {
+    font-weight: bold;
+    color: #0f0;
+  }
+
+  /* Set consistent width for both containers */
+.pose-timer,
+.score-board {
+  width: 100%;
+  max-width: 600px; /* Adjust this value to match the Final Score container width */
+  box-sizing: border-box;
+  margin: 0 auto;
+  border: 1px solid #4b7758;
+}
+
+/* If you need them to be positioned side by side at some point */
+.timer-container,
+.score-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Add consistent margins between the elements */
+.pose-timer {
+  margin-bottom: 20px;
+}
+
+/* Ensure inner content aligns properly */
+.pose-title,
+.score-section h2 {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #7da78c;
+  padding: 8px;
+}

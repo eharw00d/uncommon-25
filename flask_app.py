@@ -96,11 +96,6 @@ def draw_pixel_frames(image):
             cv2.line(image, (0, idx2), (WIDTH, idx2), (50, 50, 50), 2)
     return image
 
-
-def check_frames(image):
-    pass
-
-
 def movenet(input_image):
     input_image_np = input_image.numpy()[0].astype(np.uint8)
     rgb_image = cv2.cvtColor(input_image_np, cv2.COLOR_BGR2RGB)
@@ -224,7 +219,8 @@ def draw_scrolling_dots(image):
     return image
 
 
-test_array = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+test_array = [
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
@@ -311,6 +307,7 @@ def status():
 
 def generate_frames():
     global frame_counter
+    score_print_interval = 30  # Print score every 30 frames (about once per second at 30fps)
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -328,6 +325,9 @@ def generate_frames():
         poly_layer = np.zeros_like(frame)
         poly_layer = poly(poly_layer, keypoints)
 
+        # Calculate score
+        score_data = get_score(poly_layer)
+        
         grid_layer = gridcheck(poly_layer)
         pixel_grid_layer = draw_pixel_frames(np.zeros_like(frame))
 
@@ -340,6 +340,10 @@ def generate_frames():
         final_overlay = cv2.addWeighted(final_overlay, 1.0, pixel_grid_layer, 1.0, 0)
         final_overlay = cv2.addWeighted(final_overlay, 1.0, skeleton_layer, 1.0, 0)
         final_overlay = cv2.addWeighted(final_overlay, 1.0, dots_layer, 1.0, 0)
+        
+        # Print score to stdout at specified interval to avoid flooding
+        if frame_counter % score_print_interval == 0:
+            print(f"Score: {score_data['score']} / {score_data['max_possible']} | Boxes: {score_data['boxes_lit']} / {score_data['total_boxes']}")
 
         final_overlay = cv2.flip(final_overlay, 1)
 
@@ -365,12 +369,103 @@ def generate_frames():
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
 
+def get_score(image):
+    """
+    Calculate score based on highlighted boxes in the image.
+    
+    Args:
+        image: The processed image with highlighted boxes
+        
+    Returns:
+        int: Score calculated as 10 points per test_array box that is lit up by the player
+    """
+    height, width, _ = image.shape
+    grid_size = 120
+    
+    # White mask to detect player's presence (white pixels)
+    white_mask = np.all(image == [255, 255, 255], axis=-1)
+    
+    rows = height // grid_size
+    cols = width // grid_size
+    
+    score = 0
+    total_boxes = 0
+    
+    for row in range(rows):
+        for col in range(cols):
+            x = col * grid_size
+            y = row * grid_size
+            
+            # Map to test_array coordinates
+            test_row = min(row * len(test_array) // rows, len(test_array) - 1)
+            test_col = min(col * len(test_array[0]) // cols, len(test_array[0]) - 1)
+            
+            # Check if this is a box that should be lit up
+            if test_array[test_row][test_col] == 1:
+                total_boxes += 1
+                
+                # Check if the player is in this box (white pixels present)
+                region = white_mask[y:y + grid_size, x:x + grid_size]
+                if np.any(region):
+                    score += 10  # Award 10 points for each lit box
+    
+    score_data = {
+        "score": score,
+        "max_possible": total_boxes * 10,
+        "boxes_lit": score // 10,
+        "total_boxes": total_boxes
+    }
+    
+    # No need to print here since we're printing in generate_frames
+    
+    return score_data
+
 @app.route('/video_feed')
 def video_feed():
     response = Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
 
+@app.route('/get_score')
+def score_endpoint():
+    """
+    Endpoint to get the current score based on the latest processed frame.
+    Returns the score as JSON.
+    """
+    ret, frame = cap.read()
+    if not ret:
+        return jsonify({"error": "Could not capture frame"}), 500
+    
+    frame = cv2.resize(frame, (WIDTH, HEIGHT))
+    
+    img_tensor = tf.convert_to_tensor(frame)
+    input_image = tf.image.resize_with_pad(img_tensor, input_size, input_size)
+    input_image = tf.expand_dims(input_image, axis=0)
+    
+    keypoints = movenet(input_image)
+    
+    # Create the poly layer with player's position
+    poly_layer = np.zeros_like(frame)
+    poly_layer = poly(poly_layer, keypoints)
+    
+    # Calculate score using the poly_layer
+    score_data = get_score(poly_layer)
+    
+    response = jsonify(score_data)
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    
+    return response
+
+# Add preflight response for CORS
+@app.route('/get_score', methods=['OPTIONS'])
+def options_get_score():
+    response = jsonify({'status': 'success'})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    return response
 
 # Add preflight response for CORS
 @app.route('/video_feed', methods=['OPTIONS'])
