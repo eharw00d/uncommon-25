@@ -44,6 +44,7 @@
 }
 
 .friends-bar{
+    gap: 30px;
     padding-left: 40px;
 }
 
@@ -169,4 +170,21 @@ body {
     width: 100%;
     height: auto;
     display: block;
+}
+
+.friend-button {
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px 30px;
+    border: 2px solid #333;
+}
+
+.name-button {
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px 30px;
+    border: 2px solid #333;
+}
+
+.name-button:hover, .friend-button:hover{
+    color: white;
+    background-color: #333;
 }

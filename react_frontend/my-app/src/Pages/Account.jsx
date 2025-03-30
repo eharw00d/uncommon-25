@@ -98,6 +98,8 @@ const Account = () => {
                 <div className="single-friend">
                     <Friendbar/>
                 </div>
+                <Link to='/addfriend'><button className='friend-button'>Add Friend</button></Link>
+                <Link to='/addname'><button className='name-button'>Add your name NOW</button></Link>
             </div>
             <div className="middle-title">
                 <div className="welcome-msg">

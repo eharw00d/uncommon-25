@@ -32,9 +32,9 @@ const SimpleFriendAdd = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h2>Simple Friend Management</h2>
+      <h2>Add Friends here!</h2>
       <div>
-        <h3>Your User ID:</h3>
+        <h3>Your User ID (share this with friends):</h3>
         <p>{userId || 'Loading...'}</p>
       </div>
 
