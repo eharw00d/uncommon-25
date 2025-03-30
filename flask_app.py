@@ -405,6 +405,8 @@ def generate_frames():
 def get_score(image):
     """
     Calculate score based on highlighted boxes in the image.
+    Adds 10 points for each correct box the player is in.
+    Subtracts 10 points for each incorrect box the player is in.
     
     Args:
         image: The processed image with highlighted boxes
@@ -425,6 +427,8 @@ def get_score(image):
     
     score = 0
     total_boxes = 0
+    boxes_lit = 0
+    incorrect_boxes = 0
     
     for row in range(rows):
         for col in range(cols):
@@ -435,24 +439,32 @@ def get_score(image):
             test_row = min(row * len(test_array) // rows, len(test_array) - 1)
             test_col = min(col * len(test_array[0]) // cols, len(test_array[0]) - 1)
             
+            # Check if the player is in this box (white pixels present)
+            region = white_mask[y:y + grid_size, x:x + grid_size]
+            player_in_box = np.any(region)
+            
             # Check if this is a box that should be lit up
             if test_array[test_row][test_col] == 1:
                 total_boxes += 1
                 
-                # Check if the player is in this box (white pixels present)
-                region = white_mask[y:y + grid_size, x:x + grid_size]
-                if np.any(region):
-                    score += 10  # Award 10 points for each lit box
+                if player_in_box:
+                    score += 10  # Award 10 points for each correct box
+                    boxes_lit += 1
+            else:
+                # If player is in a box they shouldn't be in, subtract points
+                if player_in_box:
+                    score -= 5  # Subtract 10 points for incorrect placement
+                    incorrect_boxes += 1
     
     score_data = {
-        "score": score,
+        "score": max(score, 0),
         "max_possible": total_boxes * 10,
-        "boxes_lit": score // 10,
-        "total_boxes": total_boxes
+        "boxes_lit": boxes_lit,
+        "total_boxes": total_boxes,
+        "incorrect_boxes": incorrect_boxes
     }
     
     return score_data
-
 @app.route('/video_feed')
 def video_feed():
     response = Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -578,7 +590,7 @@ def options_check_shrimp():
 
 if __name__ == "__main__":
     try:
-        app.run(host='localhost', port=8080, debug=True, threaded=True)
+        app.run(host='localhost', port=3003, debug=True, threaded=True)
     except KeyboardInterrupt:
         print("\nExiting via Ctrl+C...")
     finally:
