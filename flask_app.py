@@ -11,10 +11,12 @@ app = Flask(__name__)
 # Configure CORS to allow specific origins (your React app)
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://localhost:3004", "*"]}}, supports_credentials=True)
 
-# Constants from your original code
+# Constants from your original code - EXACTLY as in your file
 HEIGHT = 1080
 WIDTH = 1920
+
 KEYPOINT_EDGE_CONNECTIONS = mp.solutions.pose.POSE_CONNECTIONS
+
 KEYPOINT_NAMES = [
     "nose", "left_eye_inner", "left_eye", "left_eye_outer", "right_eye_inner", "right_eye", "right_eye_outer",
     "left_ear", "right_ear", "mouth_left", "mouth_right", "left_shoulder", "right_shoulder", "left_elbow",
@@ -22,6 +24,7 @@ KEYPOINT_NAMES = [
     "left_thumb", "right_thumb", "left_hip", "right_hip", "left_knee", "right_knee", "left_ankle", "right_ankle",
     "left_heel", "right_heel", "left_foot_index", "right_foot_index"
 ]
+
 POLYGON_REGIONS = {
     "torso": ["left_shoulder", "right_shoulder", "right_hip", "left_hip"],
     "upper_torso": ["left_shoulder", "right_shoulder", "nose"],
@@ -32,7 +35,7 @@ POLYGON_REGIONS = {
     "head": ["left_ear", "right_ear", "nose"]
 }
 
-# Initialize Pose model from MediaPipe
+# Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(static_image_mode=False, model_complexity=2)
 
@@ -44,7 +47,7 @@ if not cap.isOpened():
 
 input_size = 256
 
-# Functions from your original code
+# Functions from your original code - EXACTLY as they appeared
 def draw_prediction_on_image(image, keypoints_with_scores, threshold=0.3):
     height, width, _ = image.shape
     keypoints = keypoints_with_scores[0, 0, :, :]
@@ -69,11 +72,14 @@ def draw_pixel_frames(image):
     height, width, _ = image.shape
     for idx1 in range(width):
         if (idx1 % 120 == 0):
-            cv2.line(image, (idx1, 0), (idx1, height), (100,100,100), 2)
+            cv2.line(image, (idx1, 0), (idx1, HEIGHT), (100,100,100), 2)
     for idx2 in range(height):
         if (idx2 % 120 == 0):
-            cv2.line(image, (0, idx2), (width, idx2), (100,100,100), 2)
+            cv2.line(image, (0, idx2), (WIDTH, idx2), (100,100,100), 2)
     return image
+
+def check_frames(image):
+    pass
 
 def movenet(input_image):
     input_image_np = input_image.numpy()[0].astype(np.uint8)
@@ -92,12 +98,11 @@ def movenet(input_image):
 def poly(image, keypoints, threshold=0.3):
     named_keypoints = {}
     keypoints = keypoints[0, 0, :, :]
-    height, width, _ = image.shape
 
     for idx, name in enumerate(KEYPOINT_NAMES):
         y, x, conf = keypoints[idx]
         if conf > threshold:
-            named_keypoints[name] = (int(x * width), int(y * height))
+            named_keypoints[name] = (int(x * WIDTH), int(y * HEIGHT))
 
     torso_pts = [named_keypoints[pt] for pt in POLYGON_REGIONS["torso"] if pt in named_keypoints]
     if len(torso_pts) >= 3:
@@ -133,7 +138,7 @@ def poly(image, keypoints, threshold=0.3):
             box_pts = np.array([p1a, p1b, p2b, p2a], dtype=np.int32).reshape((-1, 1, 2))
             cv2.fillPoly(image, [box_pts], color=(255, 255, 255))
 
-    # neck!
+    #neck!
     if all(k in named_keypoints for k in ["nose", "left_shoulder", "right_shoulder"]):
         x_neck = (named_keypoints["left_shoulder"][0] + named_keypoints["right_shoulder"][0]) / 2
         y_neck = (named_keypoints["left_shoulder"][1] + named_keypoints["right_shoulder"][1]) / 2
@@ -141,6 +146,7 @@ def poly(image, keypoints, threshold=0.3):
 
     return image
 
+#game functionality
 def gridcheck(image):
     height, width, __ = image.shape
     for idx1 in range(0, height, 120):
@@ -160,63 +166,7 @@ def gridcheck(image):
                 cv2.polylines(image, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
     return image
 
-def generate_frames():
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-            
-        # Resize frame to a reasonable size if needed
-        frame = cv2.resize(frame, (640, 480))
-        
-        # Convert frame to TensorFlow tensor
-        img_tensor = tf.convert_to_tensor(frame)
-        input_image = tf.image.resize_with_pad(img_tensor, input_size, input_size)
-        input_image = tf.expand_dims(input_image, axis=0)
-
-        # Process the frame with MoveNet
-        keypoints = movenet(input_image)
-
-        # Create separate black canvases for different layers (same as your original code)
-        poly_layer = np.zeros_like(frame)
-        poly_layer = poly(poly_layer, keypoints)
-
-        grid_layer = gridcheck(poly_layer)
-        pixel_grid_layer = draw_pixel_frames(np.zeros_like(frame))
-
-        skeleton_layer = draw_prediction_on_image(np.zeros_like(frame), keypoints)
-
-        # Combine all layers
-        final_overlay = cv2.addWeighted(grid_layer, 1.0, poly_layer, 1.0, 0)
-        final_overlay = cv2.addWeighted(final_overlay, 1.0, pixel_grid_layer, 1.0, 0)
-        final_overlay = cv2.addWeighted(final_overlay, 1.0, skeleton_layer, 1.0, 0)
-
-        # Flip horizontally (mirror effect)
-        final_overlay = cv2.flip(final_overlay, 1)
-
-        # Convert the processed frame to JPEG and yield it
-        ret, jpeg = cv2.imencode('.jpg', final_overlay)
-        if not ret:
-            continue
-        frame = jpeg.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-
-@app.route('/video_feed')
-def video_feed():
-    response = Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-# Add preflight response for CORS
-@app.route('/video_feed', methods=['OPTIONS'])
-def options_video_feed():
-    response = jsonify({'status': 'success'})
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers", "*")
-    response.headers.add("Access-Control-Allow-Methods", "*")
-    return response
-
+# Flask routes for API endpoints
 @app.route('/')
 def index():
     # Add CORS headers to this response explicitly
@@ -230,6 +180,64 @@ def index():
 def status():
     # Another endpoint for status checks
     response = jsonify({"status": "success", "message": "Server is active"})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    return response
+
+def generate_frames():
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Can't receive frame.")
+            continue
+
+        # Keep the frame at its original resolution or resize if needed
+        # Do not scale down too much to avoid video feed being cut off
+        frame = cv2.resize(frame, (WIDTH, HEIGHT))
+        
+        img_tensor = tf.convert_to_tensor(frame)
+        input_image = tf.image.resize_with_pad(img_tensor, input_size, input_size)
+        input_image = tf.expand_dims(input_image, axis=0)
+
+        keypoints = movenet(input_image)
+
+        # Separate black canvases - EXACTLY as in your original code
+        poly_layer = np.zeros_like(frame)
+        poly_layer = poly(poly_layer, keypoints)
+
+        grid_layer = gridcheck(poly_layer)
+        pixel_grid_layer = draw_pixel_frames(np.zeros_like(frame))
+
+        skeleton_layer = draw_prediction_on_image(np.zeros_like(frame), keypoints)
+
+        # Combine all layers
+        final_overlay = cv2.addWeighted(grid_layer, 1.0, poly_layer, 1.0, 0)
+        final_overlay = cv2.addWeighted(final_overlay, 1.0, pixel_grid_layer, 1.0, 0)
+        final_overlay = cv2.addWeighted(final_overlay, 1.0, skeleton_layer, 1.0, 0)
+
+        # Flip the image horizontally (mirror effect)
+        final_overlay = cv2.flip(final_overlay, 1)
+
+        # Encode the frame as JPEG
+        ret, jpeg = cv2.imencode('.jpg', final_overlay)
+        if not ret:
+            continue
+            
+        frame_bytes = jpeg.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+
+@app.route('/video_feed')
+def video_feed():
+    response = Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+
+# Add preflight response for CORS
+@app.route('/video_feed', methods=['OPTIONS'])
+def options_video_feed():
+    response = jsonify({'status': 'success'})
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "*")
     response.headers.add("Access-Control-Allow-Methods", "*")

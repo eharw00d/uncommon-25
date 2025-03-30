@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './CSS/Camera.css'
 
 const VideoFeed = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -63,7 +64,7 @@ const VideoFeed = () => {
             onError={handleImageError}
             style={{ 
               width: '80%', 
-              maxWidth: '800px', 
+              maxWidth: '2000px', 
               border: '2px solid #333',
               borderRadius: '8px',
               boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
