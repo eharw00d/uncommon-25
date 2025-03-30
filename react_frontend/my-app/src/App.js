@@ -11,6 +11,7 @@ import UserProfile from './Pages/Usertest';
 import FriendManagement from './Pages/Friendtest';
 import SimpleFriendAdd from './Pages/Friendtest';
 import Grid from './Pages/Grid/Grid';
+import PoseLib from './Pages/PoseLib';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Route path='/camera' element={<Camera/>}></Route>
       <Route path='/create' element={<PixelPose/>}></Route>
       <Route path='/grid' element={<Grid />} /> 
+      <Route path='/poselibrary' element={<PoseLib />}></Route>
     </Routes>
     </BrowserRouter>
     </>

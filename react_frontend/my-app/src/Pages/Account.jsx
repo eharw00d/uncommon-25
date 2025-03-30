@@ -64,7 +64,7 @@ const Account = () => {
             </div>
             <div className="right-bar">
                 <Timer/>
-                <button className='pose-button'>browse pose library</button>
+                <Link to='/poselibrary'><button className='pose-button'>browse pose library</button></Link>
                 <Notifications/>
             </div>
         </div>
