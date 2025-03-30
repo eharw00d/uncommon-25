@@ -129,10 +129,6 @@ const VideoFeed = () => {
                 playsInline
               />
             </div>
-            
-            <p style={{ marginTop: '10px', fontSize: '14px', color: '#666', textAlign: 'left' }}>
-              Pixel data from each frame is being logged to the console.
-            </p>
           </div>
 
           {/* Right side - Timer and ScoreBoard */}

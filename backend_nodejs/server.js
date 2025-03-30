@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const { auth } = require('express-oauth2-jwt-bearer');
 require('dotenv').config();
+const serverless = require('serverless-http');
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -31,6 +32,13 @@ app.use((err, req, res, next) => {
   console.error('Server error:', err);
   res.status(500).json({ message: 'Server error' });
 });
+
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'OK', message: "It's all good" });
+});  
+
+module.exports.handler = serverless(app);
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)

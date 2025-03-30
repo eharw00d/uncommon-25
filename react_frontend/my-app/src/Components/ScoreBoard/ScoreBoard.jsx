@@ -7,9 +7,9 @@ const ScoreBoard = ({ isGameOver }) => {
   const [boxesLit, setBoxesLit] = useState(0);
   const [totalBoxes, setTotalBoxes] = useState(0);
   const [highScores, setHighScores] = useState([
-    { name: "Player 1", score: 380 },
-    { name: "Player 2", score: 340 },
-    { name: "Player 3", score: 290 }
+    { name: "Amanda Murphy", score: 380 },
+    { name: "Red Atagi", score: 340 },
+    { name: "Jamie Shiao", score: 290 }
   ]);
   const [finalScore, setFinalScore] = useState(0);
   const [fetchError, setFetchError] = useState(null);

@@ -7,6 +7,7 @@ import sys, random, json
 import math
 from flask_cors import CORS
 
+
 app = Flask(__name__)
 global test_array
 # Configure CORS to allow specific origins (your React app)
