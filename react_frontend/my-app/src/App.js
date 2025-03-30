@@ -6,6 +6,7 @@ import NavBar from './Components/NavBar/NavBar';
 import Login from './Pages/Login';
 import Camera from './Pages/Camera';
 import PixelPose from './Pages/PixelPose';
+import Grid from './Pages/Grid/Grid';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path='/login' element={<Login/>}/>
       <Route path='/camera' element={<Camera/>}></Route>
       <Route path='/create' element={<PixelPose/>}></Route>
+      <Route path='/grid' element={<Grid />} /> 
     </Routes>
     </BrowserRouter>
   );

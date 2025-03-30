@@ -479,7 +479,7 @@ def options_video_feed():
 
 if __name__ == "__main__":
     try:
-        app.run(host='localhost', port=8080, debug=True, threaded=True)
+        app.run(host='localhost', port=3003, debug=True, threaded=True)
     except KeyboardInterrupt:
         print("\nExiting via Ctrl+C...")
     finally:

@@ -12,7 +12,7 @@ const VideoFeed = () => {
   const imgRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const serverUrl = "http://localhost:8080";
+  const serverUrl = "http://localhost:3003";
   const videoUrl = `${serverUrl}/video_feed`;
 
   // Server connection check
