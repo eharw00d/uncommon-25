@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema({
     },
     type: {
       type: String,
-      enum: ['friend_request', 'pose_completed', 'pose_shared', 'other'],
+      enum: ['friend_request', 'pose_completed', 'pose_shared', 'bump', 'other'],
       required: true
     },
     message: String,

@@ -166,6 +166,44 @@ router.get('/me/notifications', async (req, res) => {
   }
 });
 
+// Add a bump notification endpoint
+router.post('/users/:userId/bump', async (req, res) => {
+    try {
+      const { userId } = req.params; // ID of the friend to notify
+      const auth0Id = req.auth.payload.sub; // Current user's Auth0 ID
+      
+      // Get the current user's info
+      const user = await User.findOne({ auth0Id });
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Find the friend to notify
+      const friend = await User.findById(userId);
+      
+      if (!friend) {
+        return res.status(404).json({ message: 'Friend not found' });
+      }
+      
+      // Add bump notification to friend's notifications array
+      friend.notifications.push({
+        type: 'bump',
+        user_id: user._id,
+        message: `${user.name} bumped you!`,
+        read: false,
+        created_at: new Date()
+      });
+      
+      await friend.save();
+      
+      res.status(200).json({ message: 'Bump notification sent' });
+    } catch (error) {
+      console.error('Error sending bump notification:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
 // Mark notification as read
 router.put('/me/notifications/:notificationId', async (req, res) => {
   try {
@@ -192,5 +230,80 @@ router.put('/me/notifications/:notificationId', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// In routes/users.js
+// In routes/users.js
+// In routes/users.js
+router.post('/notify', async (req, res) => {
+    try {
+      const auth0Id = req.auth.payload.sub;
+      const { recipientId, type, message } = req.body;
+      
+      // Get current user
+      const sender = await User.findOne({ auth0Id });
+      
+      if (!sender) {
+        return res.status(404).json({ message: 'Sender not found' });
+      }
+      
+      // Get recipient
+      const recipient = await User.findById(recipientId);
+      
+      if (!recipient) {
+        return res.status(404).json({ message: 'Recipient not found' });
+      }
+      
+      // Add notification to recipient's notifications array
+      recipient.notifications.push({
+        type,
+        user_id: sender._id,
+        message,
+        read: false,
+        created_at: new Date()
+      });
+      
+      await recipient.save();
+      
+      res.status(200).json({ success: true });
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+// Add a bump to a friend
+router.post('/me/bump-friend', async (req, res) => {
+    try {
+      const auth0Id = req.auth.payload.sub;
+      const { friendUserId } = req.body;
+      
+      const user = await User.findOne({ auth0Id });
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Check if friend exists
+      const friend = await User.findById(friendUserId);
+      if (!friend) {
+        return res.status(404).json({ message: 'Friend not found' });
+      }
+      
+      // Add bump notification for the friend
+      friend.notifications.push({
+        type: 'bump',
+        user_id: user._id,
+        message: `${user.name} bumped you!`
+      });
+      await friend.save();
+      
+      res.status(200).json({ message: 'Bump notification sent' });
+    } catch (error) {
+      console.error('Error sending bump:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+
 
 module.exports = router;

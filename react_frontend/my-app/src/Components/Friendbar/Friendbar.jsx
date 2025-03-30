@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../services/api';
 import './Friendbar.css';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const Friendbar = () => {
+    const { getAccessTokenSilently, user } = useAuth0();
   const { userApi } = useApi();
   const [searchTerm, setSearchTerm] = useState('');
   const [friends, setFriends] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
   const [hasFetched, setHasFetched] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -15,24 +16,19 @@ const Friendbar = () => {
     // Only fetch once
     if (hasFetched) return;
     
-    const fetchData = async () => {
+    const fetchFriends = async () => {
       try {
-        // Fetch current user for their name
-        const userData = await userApi.getProfile();
-        setCurrentUser(userData);
-        
-        // Fetch friends
-        const friendsData = await userApi.getFriends();
-        setFriends(Array.isArray(friendsData) ? friendsData : []);
+        const data = await userApi.getFriends();
+        setFriends(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('Error fetching friends:', err);
         setFriends([]);
       } finally {
         setHasFetched(true);
       }
     };
     
-    fetchData();
+    fetchFriends();
   }, [userApi, hasFetched]);
   
   const handleSearchChange = (e) => {
@@ -57,41 +53,39 @@ const Friendbar = () => {
   };
   
   const handlePopupAction = async (action) => {
-    if (!selectedFriend || !currentUser) return;
+    if (!selectedFriend) return;
     
     if (action === 'draw') {
       console.log('Draw selected for friend:', selectedFriend?.user_id?.name);
       // Implement the draw functionality here
     } else if (action === 'random') {
-      console.log('Random selected for friend:', selectedFriend?.user_id?.name);
-      
-      try {
-        // Use the current user's real name instead of Auth0 ID
-        const userName = currentUser.name;
-        
-        // Create a notification for the friend
-        const notification = {
-          type: 'bump',
-          user_id: selectedFriend.user_id._id,
-          message: `${userName} bumped you!`,
-          read: false
-        };
-        
-        // For real implementation, you would send this to your API
-        // await userApi.createNotification(notification);
-        
-        // For the purpose of this demo, we'll dispatch a custom event to update the notifications component
-        const newNotificationEvent = new CustomEvent('newNotification', {
-          detail: { notification }
-        });
-        window.dispatchEvent(newNotificationEvent);
-        
-        // Also show confirmation to the current user
-        alert(`You bumped ${selectedFriend.user_id.name}!`);
-      } catch (error) {
-        console.error('Error creating notification:', error);
+        try {
+          // Get the friend's user ID
+          const friendUserId = selectedFriend.user_id._id;
+          
+          // Use the existing endpoint to post to friend
+          const response = await fetch('http://localhost:8000/api/users/me/bump-friend', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${await getAccessTokenSilently()}`
+            },
+            body: JSON.stringify({
+              friendUserId: friendUserId
+            })
+          });
+          
+          if (response.ok) {
+            alert(`You bumped ${selectedFriend.user_id.name}! They will be notified.`);
+          } else {
+            console.error('API response status:', response.status);
+            alert('Failed to send bump notification. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error in bump process:', error);
+          alert('Something went wrong. Please try again.');
+        }
       }
-    }
     
     // Close the popup after action
     setShowPopup(false);

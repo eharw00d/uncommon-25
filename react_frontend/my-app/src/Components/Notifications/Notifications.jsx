@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApi } from '../../services/api';
 import './Notifications.css';
 
 const Notifications = () => {
+  const navigate = useNavigate();
   const { userApi } = useApi();
   const [notifications, setNotifications] = useState([]);
   const [hasFetched, setHasFetched] = useState(false);
@@ -47,6 +49,7 @@ const Notifications = () => {
   const handleDoPose = (notification) => {
     console.log('User clicked to do pose', notification);
     // Add your navigation or action logic here
+    navigate('/camera');
   };
 
   return (
