@@ -13,13 +13,25 @@ const checkJwt = auth({
 });
 
 // enforce on all endpoints
-app.use(jwtCheck);
+// app.use(jwtCheck);
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, PUT, POST");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
 
 app.get('/authorized', function (req, res) {
     res.send('Secured Resource');
 });
 
 app.listen(port);
+
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Everything went well!' });
+    console.log("AHHHHHHHHHHHHHHH");
+  });
 
 // This route doesn't need authentication
 app.get('/api/public', function (req, res) {
@@ -30,6 +42,7 @@ app.get('/api/public', function (req, res) {
 
 // This route needs authentication
 app.get('/api/private', checkJwt, function (req, res) {
+    console.log("someone is in private")
     res.json({
         message: 'Hello from a private endpoint! You need to be authenticated to see this.'
     });
