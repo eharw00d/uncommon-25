@@ -49,6 +49,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
 });
 
+// Simple health check endpoint (no auth required)
+app.get('/', (req, res) => {
+    res.status(200).json({ status: 'OK', message: "It's all good" });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
