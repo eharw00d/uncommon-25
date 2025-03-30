@@ -16,6 +16,17 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.use('/api/users', checkJwt, (req, res, next) => {
+    console.log('Reached users route');
+    next();
+  }, userRoutes);
+  
+  app.use('/api/poses', checkJwt, (req, res, next) => {
+    console.log('Reached poses route');
+    next();
+  }, poseRoutes);
+  
+
 // Auth0 middleware for securing endpoints
 const checkJwt = auth({
   audience: 'https://pixel-pose.us.auth0.com/api/v2/',
