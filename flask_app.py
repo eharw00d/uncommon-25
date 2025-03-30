@@ -63,10 +63,11 @@ if not cap.isOpened():
 
 input_size = 256
 
+
 # Functions from your original code - EXACTLY as they appeared
 def draw_prediction_on_image(image, keypoints_with_scores, threshold=0.3):
     height, width, _ = image.shape
-    keypoints = keypoints_with_scores[0, 0, :, :]
+    keypoints = keypoints_with_scores[0, 0,:,:]
 
     for idx, kp in enumerate(keypoints):
         y, x, confidence = kp
@@ -84,18 +85,21 @@ def draw_prediction_on_image(image, keypoints_with_scores, threshold=0.3):
 
     return image
 
+
 def draw_pixel_frames(image):
     height, width, _ = image.shape
     for idx1 in range(width):
         if (idx1 % 120 == 0):
-            cv2.line(image, (idx1, 0), (idx1, HEIGHT), (50,50,50), 2)
+            cv2.line(image, (idx1, 0), (idx1, HEIGHT), (50, 50, 50), 2)
     for idx2 in range(height):
         if (idx2 % 120 == 0):
-            cv2.line(image, (0, idx2), (WIDTH, idx2), (50,50,50), 2)
+            cv2.line(image, (0, idx2), (WIDTH, idx2), (50, 50, 50), 2)
     return image
+
 
 def check_frames(image):
     pass
+
 
 def movenet(input_image):
     input_image_np = input_image.numpy()[0].astype(np.uint8)
@@ -111,9 +115,10 @@ def movenet(input_image):
 
     return keypoints_with_scores
 
+
 def poly(image, keypoints, threshold=0.3):
     named_keypoints = {}
-    keypoints = keypoints[0, 0, :, :]
+    keypoints = keypoints[0, 0,:,:]
 
     for idx, name in enumerate(KEYPOINT_NAMES):
         y, x, conf = keypoints[idx]
@@ -201,7 +206,6 @@ def poly(image, keypoints, threshold=0.3):
             # Optional glow on glow layer
             cv2.circle(glow_layer, (cx, cy), ring_radius, (0, 255, 255), thickness=6)
 
-
     # Blur for glow
     blurred_glow = cv2.GaussianBlur(glow_layer, (51, 51), sigmaX=0, sigmaY=0)
 
@@ -209,6 +213,7 @@ def poly(image, keypoints, threshold=0.3):
     image = cv2.addWeighted(image, 1.0, blurred_glow, 0.6, 0)
 
     return image
+
 
 def draw_scrolling_dots(image):
     for dot in dot_particles:
@@ -218,7 +223,19 @@ def draw_scrolling_dots(image):
         cv2.circle(image, (x, y), radius, color, -1)
     return image
 
-#game functionality
+
+test_array = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]]
+
+
+# game functionality
 def gridcheck(image):
     height, width, _ = image.shape
     grid_size = 120
@@ -230,12 +247,21 @@ def gridcheck(image):
     rows = height // grid_size
     cols = width // grid_size
 
+    # Create a transparent overlay image for half transparency
+    overlay = image.copy()
+
     for row in range(rows):
         for col in range(cols):
             x = col * grid_size
             y = row * grid_size
 
-            region = white_mask[y:y+grid_size, x:x+grid_size]
+            # Check corresponding cell in test_array (you might need to scale or adjust based on resolution)
+            test_row = row * len(test_array) // rows
+            test_col = col * len(test_array[0]) // cols
+            if test_array[test_row][test_col] == 1:  # Color red if the cell value is 1
+                cv2.rectangle(overlay, (x, y), (x + grid_size, y + grid_size), (80, 80, 0), thickness=-1)
+
+            region = white_mask[y:y + grid_size, x:x + grid_size]
             has_white = np.any(region)
 
             if not has_white:
@@ -243,20 +269,23 @@ def gridcheck(image):
 
             # Check neighbors: if any side borders a non-white region, draw that side
             # Top
-            if row == 0 or not np.any(white_mask[(row - 1)*grid_size:row*grid_size, x:x+grid_size]):
+            if row == 0 or not np.any(white_mask[(row - 1) * grid_size:row * grid_size, x:x + grid_size]):
                 cv2.line(image, (x, y), (x + grid_size, y), grid_color, thickness)
             # Bottom
-            if row == rows - 1 or not np.any(white_mask[(row + 1)*grid_size:(row + 2)*grid_size, x:x+grid_size]):
+            if row == rows - 1 or not np.any(white_mask[(row + 1) * grid_size:(row + 2) * grid_size, x:x + grid_size]):
                 cv2.line(image, (x, y + grid_size), (x + grid_size, y + grid_size), grid_color, thickness)
             # Left
-            if col == 0 or not np.any(white_mask[y:y+grid_size, (col - 1)*grid_size:col*grid_size]):
+            if col == 0 or not np.any(white_mask[y:y + grid_size, (col - 1) * grid_size:col * grid_size]):
                 cv2.line(image, (x, y), (x, y + grid_size), grid_color, thickness)
             # Right
-            if col == cols - 1 or not np.any(white_mask[y:y+grid_size, (col + 1)*grid_size:(col + 2)*grid_size]):
+            if col == cols - 1 or not np.any(white_mask[y:y + grid_size, (col + 1) * grid_size:(col + 2) * grid_size]):
                 cv2.line(image, (x + grid_size, y), (x + grid_size, y + grid_size), grid_color, thickness)
 
-    return image
+    # Apply half transparency by blending the overlay with the original image
+    alpha = 0.5  # 50% transparency
+    cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0, image)
 
+    return image
 
 
 # Flask routes for API endpoints
@@ -269,6 +298,7 @@ def index():
     response.headers.add("Access-Control-Allow-Methods", "*")
     return response
 
+
 @app.route('/status')
 def status():
     # Another endpoint for status checks
@@ -277,6 +307,7 @@ def status():
     response.headers.add("Access-Control-Allow-Headers", "*")
     response.headers.add("Access-Control-Allow-Methods", "*")
     return response
+
 
 def generate_frames():
     global frame_counter
@@ -328,17 +359,18 @@ def generate_frames():
                 dot["gray"] = random.randint(60, 120)
                 dot["direction"] = random.choice([-1, 1])
 
-
         frame_counter += 1  # move dots
         frame_bytes = jpeg.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+
 
 @app.route('/video_feed')
 def video_feed():
     response = Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
     response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
 
 # Add preflight response for CORS
 @app.route('/video_feed', methods=['OPTIONS'])
@@ -349,9 +381,10 @@ def options_video_feed():
     response.headers.add("Access-Control-Allow-Methods", "*")
     return response
 
+
 if __name__ == "__main__":
     try:
-        app.run(host='0.0.0.0', port=8080, debug=True, threaded=True)
+        app.run(host='localhost', port=8080, debug=True, threaded=True)
     except KeyboardInterrupt:
         print("\nExiting via Ctrl+C...")
     finally:

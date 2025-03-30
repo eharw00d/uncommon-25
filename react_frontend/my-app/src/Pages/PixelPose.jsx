@@ -9,9 +9,9 @@ const PixelPose = () => {
   const [history, setHistory] = useState([]);
   
   // Initialize with an empty grid immediately to avoid undefined errors
-  const gridWidth = 128;  // number of columns
-  const gridHeight = 72;  // number of rows
-  const pixelSize = 10;   // size of each pixel in canvas
+  const gridWidth = 32;  // number of columns
+  const gridHeight = 18;  // number of rows
+  const pixelSize = 30;   // size of each pixel in canvas
   
   // Initialize drawnPose with a proper 2D array right away
   const [drawnPose, setDrawnPose] = useState(
