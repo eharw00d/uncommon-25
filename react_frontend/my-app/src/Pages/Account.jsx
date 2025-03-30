@@ -43,19 +43,19 @@ const Account = () => {
     useEffect(() => {
         if (shrimpDetection) {
             // Start fetching video feed
-            setVideoFeed('http://localhost:8080/video_feed');
+            setVideoFeed('http://localhost:3003/video_feed');
             
             // Start polling the score endpoint to check for head-shoulder overlap
             shrimpCheckIntervalRef.current = setInterval(async () => {
                 try {
-                    const response = await fetch('http://localhost:8080/get_score');
+                    const response = await fetch('http://localhost:3003/get_score');
                     const data = await response.json();
                     
                     // Check if we have a score - this means pose detection is running
                     if (data.score !== undefined) {
                         // Make another request to check if head overlaps with shoulders
                         // We'll need to modify the Flask backend to add this endpoint
-                        const shrimpResponse = await fetch('http://localhost:8080/check_shrimp');
+                        const shrimpResponse = await fetch('http://localhost:3003/check_shrimp');
                         const shrimpData = await shrimpResponse.json();
                         
                         setIsShrimp(shrimpData.isShrimp);
