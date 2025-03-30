@@ -3,7 +3,7 @@ import cv2
 import tensorflow as tf
 import numpy as np
 import mediapipe as mp
-import sys
+import sys, random
 import math
 from flask_cors import CORS
 
@@ -34,6 +34,22 @@ POLYGON_REGIONS = {
     "right_leg": ["right_hip", "right_knee", "right_ankle"],
     "head": ["left_ear", "right_ear", "nose"]
 }
+
+frame_counter = 0
+
+# Initialize scrolling dot data
+NUM_DOTS = 80  # more dots!
+dot_particles = []
+
+for _ in range(NUM_DOTS):
+    dot_particles.append({
+        "x": random.randint(0, WIDTH),
+        "y": random.randint(0, HEIGHT),
+        "speed": random.uniform(1.0, 4.0),
+        "radius": random.randint(2, 5),
+        "gray": random.randint(60, 120),
+        "direction": random.choice([-1, 1])  # -1 = leftward, 1 = rightward
+    })
 
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
@@ -72,10 +88,10 @@ def draw_pixel_frames(image):
     height, width, _ = image.shape
     for idx1 in range(width):
         if (idx1 % 120 == 0):
-            cv2.line(image, (idx1, 0), (idx1, HEIGHT), (100,100,100), 2)
+            cv2.line(image, (idx1, 0), (idx1, HEIGHT), (50,50,50), 2)
     for idx2 in range(height):
         if (idx2 % 120 == 0):
-            cv2.line(image, (0, idx2), (WIDTH, idx2), (100,100,100), 2)
+            cv2.line(image, (0, idx2), (WIDTH, idx2), (50,50,50), 2)
     return image
 
 def check_frames(image):
@@ -104,16 +120,23 @@ def poly(image, keypoints, threshold=0.3):
         if conf > threshold:
             named_keypoints[name] = (int(x * WIDTH), int(y * HEIGHT))
 
+    glow_layer = np.zeros_like(image)
+
+    # Torso
     torso_pts = [named_keypoints[pt] for pt in POLYGON_REGIONS["torso"] if pt in named_keypoints]
     if len(torso_pts) >= 3:
+        cv2.fillPoly(glow_layer, [np.array(torso_pts, dtype=np.int32)], color=(0, 255, 255))
         cv2.fillPoly(image, [np.array(torso_pts, dtype=np.int32)], color=(255, 255, 255))
 
+    # Face circle
     if "nose" in named_keypoints and ("left_ear" in named_keypoints or "right_ear" in named_keypoints):
         outer_face_point = named_keypoints.get("left_ear") or named_keypoints.get("right_ear")
         nose_point = named_keypoints["nose"]
         radius = int(math.dist(nose_point, outer_face_point))
+        cv2.circle(glow_layer, nose_point, radius, (0, 255, 255), -1)
         cv2.circle(image, nose_point, radius, (255, 255, 255), -1)
 
+    # Limbs
     for segment in [
         ("left_shoulder", "left_elbow"), ("right_shoulder", "right_elbow"),
         ("left_elbow", "left_wrist"), ("right_elbow", "right_wrist"),
@@ -136,35 +159,105 @@ def poly(image, keypoints, threshold=0.3):
             p2a = np.array([x2, y2]) + offset
 
             box_pts = np.array([p1a, p1b, p2b, p2a], dtype=np.int32).reshape((-1, 1, 2))
+            cv2.fillPoly(glow_layer, [box_pts], color=(0, 255, 255))
             cv2.fillPoly(image, [box_pts], color=(255, 255, 255))
 
-    #neck!
+    # Neck
     if all(k in named_keypoints for k in ["nose", "left_shoulder", "right_shoulder"]):
         x_neck = (named_keypoints["left_shoulder"][0] + named_keypoints["right_shoulder"][0]) / 2
         y_neck = (named_keypoints["left_shoulder"][1] + named_keypoints["right_shoulder"][1]) / 2
+        cv2.line(glow_layer, (int(x_neck), int(y_neck)), (int(named_keypoints["nose"][0]), int(named_keypoints["nose"][1])), (0, 255, 255), 50)
         cv2.line(image, (int(x_neck), int(y_neck)), (int(named_keypoints["nose"][0]), int(named_keypoints["nose"][1])), (255, 255, 255), 50)
 
+    # --- Helmet (with glow) ---
+    if all(k in named_keypoints for k in ["nose", "left_ear", "right_ear"]):
+        nose = named_keypoints["nose"]
+        left_ear = named_keypoints["left_ear"]
+        right_ear = named_keypoints["right_ear"]
+
+        helmet_center = nose
+        helmet_radius = int(max(math.dist(nose, left_ear), math.dist(nose, right_ear)) * 1.6)
+
+        # Glow layer gets the outer glow
+        cv2.circle(glow_layer, helmet_center, int(helmet_radius * 0.75), (0, 255, 255), thickness=6)
+
+        # Main image gets the solid helmet
+        cv2.circle(image, helmet_center, int(helmet_radius * 0.75), (255, 255, 255), thickness=-1)
+    
+    # --- Palm Rings (1 per hand, proportional to forearm) ---
+    for side in ["left", "right"]:
+        wrist = f"{side}_wrist"
+        elbow = f"{side}_elbow"
+        if wrist in named_keypoints and elbow in named_keypoints:
+            cx, cy = named_keypoints[wrist]
+            ex, ey = named_keypoints[elbow]
+
+            forearm_len = math.dist((cx, cy), (ex, ey))
+            ring_radius = int(forearm_len * 0.2)
+
+            # White ring on main image
+            cv2.circle(image, (cx, cy), ring_radius, (255, 255, 255), thickness=4)
+
+            # Optional glow on glow layer
+            cv2.circle(glow_layer, (cx, cy), ring_radius, (0, 255, 255), thickness=6)
+
+
+    # Blur for glow
+    blurred_glow = cv2.GaussianBlur(glow_layer, (51, 51), sigmaX=0, sigmaY=0)
+
+    # Overlay glow onto image
+    image = cv2.addWeighted(image, 1.0, blurred_glow, 0.6, 0)
+
+    return image
+
+def draw_scrolling_dots(image):
+    for dot in dot_particles:
+        x, y = int(dot["x"]), int(dot["y"])
+        radius = dot["radius"]
+        color = (dot["gray"], dot["gray"], dot["gray"])
+        cv2.circle(image, (x, y), radius, color, -1)
     return image
 
 #game functionality
 def gridcheck(image):
-    height, width, __ = image.shape
-    for idx1 in range(0, height, 120):
-        for idx2 in range(0, width, 120):
-            start = (idx1, idx2)
-            end = (idx1 + 120, idx2 + 120)
-            if idx1 + 120 > height or idx2 + 120 > width:
+    height, width, _ = image.shape
+    grid_size = 120
+    grid_color = (0, 200, 0)
+    thickness = 2
+
+    white_mask = np.all(image == [255, 255, 255], axis=-1)
+
+    rows = height // grid_size
+    cols = width // grid_size
+
+    for row in range(rows):
+        for col in range(cols):
+            x = col * grid_size
+            y = row * grid_size
+
+            region = white_mask[y:y+grid_size, x:x+grid_size]
+            has_white = np.any(region)
+
+            if not has_white:
                 continue
-            region = image[start[0]:end[0], start[1]:end[1]]
-            if np.any(np.all(region == [255, 255, 255], axis=-1)):
-                pts = np.array([
-                    [start[1], start[0]],
-                    [end[1], start[0]],
-                    [end[1], end[0]],
-                    [start[1], end[0]]
-                ], dtype=np.int32)
-                cv2.polylines(image, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
+
+            # Check neighbors: if any side borders a non-white region, draw that side
+            # Top
+            if row == 0 or not np.any(white_mask[(row - 1)*grid_size:row*grid_size, x:x+grid_size]):
+                cv2.line(image, (x, y), (x + grid_size, y), grid_color, thickness)
+            # Bottom
+            if row == rows - 1 or not np.any(white_mask[(row + 1)*grid_size:(row + 2)*grid_size, x:x+grid_size]):
+                cv2.line(image, (x, y + grid_size), (x + grid_size, y + grid_size), grid_color, thickness)
+            # Left
+            if col == 0 or not np.any(white_mask[y:y+grid_size, (col - 1)*grid_size:col*grid_size]):
+                cv2.line(image, (x, y), (x, y + grid_size), grid_color, thickness)
+            # Right
+            if col == cols - 1 or not np.any(white_mask[y:y+grid_size, (col + 1)*grid_size:(col + 2)*grid_size]):
+                cv2.line(image, (x + grid_size, y), (x + grid_size, y + grid_size), grid_color, thickness)
+
     return image
+
+
 
 # Flask routes for API endpoints
 @app.route('/')
@@ -186,14 +279,13 @@ def status():
     return response
 
 def generate_frames():
+    global frame_counter
     while True:
         ret, frame = cap.read()
         if not ret:
             print("Can't receive frame.")
             continue
 
-        # Keep the frame at its original resolution or resize if needed
-        # Do not scale down too much to avoid video feed being cut off
         frame = cv2.resize(frame, (WIDTH, HEIGHT))
         
         img_tensor = tf.convert_to_tensor(frame)
@@ -202,7 +294,6 @@ def generate_frames():
 
         keypoints = movenet(input_image)
 
-        # Separate black canvases - EXACTLY as in your original code
         poly_layer = np.zeros_like(frame)
         poly_layer = poly(poly_layer, keypoints)
 
@@ -211,19 +302,34 @@ def generate_frames():
 
         skeleton_layer = draw_prediction_on_image(np.zeros_like(frame), keypoints)
 
+        dots_layer = draw_scrolling_dots(np.zeros_like(frame))
+
         # Combine all layers
         final_overlay = cv2.addWeighted(grid_layer, 1.0, poly_layer, 1.0, 0)
         final_overlay = cv2.addWeighted(final_overlay, 1.0, pixel_grid_layer, 1.0, 0)
         final_overlay = cv2.addWeighted(final_overlay, 1.0, skeleton_layer, 1.0, 0)
+        final_overlay = cv2.addWeighted(final_overlay, 1.0, dots_layer, 1.0, 0)
 
-        # Flip the image horizontally (mirror effect)
         final_overlay = cv2.flip(final_overlay, 1)
 
-        # Encode the frame as JPEG
         ret, jpeg = cv2.imencode('.jpg', final_overlay)
         if not ret:
             continue
-            
+
+        for dot in dot_particles:
+            dot["x"] += dot["speed"] * dot["direction"]
+
+            if dot["x"] < 0 or dot["x"] > WIDTH:
+                # Reset off-screen dots
+                dot["x"] = 0 if dot["direction"] > 0 else WIDTH
+                dot["y"] = random.randint(0, HEIGHT)
+                dot["speed"] = random.uniform(1.0, 4.0)
+                dot["radius"] = random.randint(2, 5)
+                dot["gray"] = random.randint(60, 120)
+                dot["direction"] = random.choice([-1, 1])
+
+
+        frame_counter += 1  # move dots
         frame_bytes = jpeg.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')

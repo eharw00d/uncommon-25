@@ -2,3 +2,11 @@ html, body {
     height: 100%;
     overflow: auto;
   }
+
+  .video-container img {
+    border-radius: 12px;
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff;
+    background-color: black;
+  }
+  
