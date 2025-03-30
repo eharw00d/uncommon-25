@@ -16,7 +16,12 @@ const Notifications = () => {
     const fetchNotifications = async () => {
       try {
         const data = await userApi.getNotifications();
-        setNotifications(Array.isArray(data) ? data : []);
+  
+        const bumpNotifications = Array.isArray(data) 
+        ? data.filter(notification => notification.type === 'bump' && !notification.read)
+        : [];
+        
+      setNotifications(bumpNotifications);
       } catch (err) {
         console.error('Error fetching notifications:', err);
         setNotifications([]);
@@ -46,10 +51,21 @@ const Notifications = () => {
     };
   }, []);
 
-  const handleDoPose = (notification) => {
-    console.log('User clicked to do pose', notification);
-    // Add your navigation or action logic here
-    navigate('/camera');
+  const handleDoPose = async (notification) => {
+    try {
+      console.log('User clicked to do pose', notification);
+      
+      // Mark notification as read in the backend
+      await userApi.markNotificationAsRead(notification._id);
+      
+      // Update local state to remove this notification
+      setNotifications(notifications.filter(n => n._id !== notification._id));
+      
+      // Navigate to camera page
+      navigate('/camera');
+    } catch (error) {
+      console.error('Error handling notification:', error);
+    }
   };
 
   return (

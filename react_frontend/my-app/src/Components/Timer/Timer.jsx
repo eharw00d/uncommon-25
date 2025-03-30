@@ -16,6 +16,8 @@ const Timer = () => {
     } else if (isActive && timeLeft === 0) {
       setIsActive(false);
       clearInterval(interval);
+      // Navigate to camera page using window.location
+      window.location.href = '/camera';
     }
     
     return () => clearInterval(interval);

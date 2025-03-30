@@ -132,11 +132,11 @@ router.post('/me/friends', async (req, res) => {
     await friend.save();
     
     // Add notification for the friend
-    friend.notifications.push({
-      type: 'friend_request',
-      user_id: user._id,
-      message: `${user.name} added you as a friend`
-    });
+    // friend.notifications.push({
+    //   type: 'friend_request',
+    //   user_id: user._id,
+    //   message: `${user.name} added you as a friend`
+    // });
     await friend.save();
     
     res.json(user.friends);

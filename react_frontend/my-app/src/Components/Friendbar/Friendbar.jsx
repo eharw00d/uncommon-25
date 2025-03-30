@@ -135,16 +135,10 @@ const Friendbar = () => {
             </div>
             <div className="bump-popup-actions">
               <button 
-                onClick={() => handlePopupAction('draw')}
-                className="bump-action-button draw-button"
-              >
-                Draw
-              </button>
-              <button 
                 onClick={() => handlePopupAction('random')}
                 className="bump-action-button random-button"
               >
-                Random
+                Send Random Pose!
               </button>
             </div>
           </div>

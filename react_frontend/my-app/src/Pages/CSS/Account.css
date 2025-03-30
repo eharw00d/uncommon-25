@@ -98,3 +98,75 @@ body {
     padding: 0;
     overflow: hidden;
 }
+
+/* Add this to your CSS/Account.css file */
+
+.toggle-button {
+    font-family:'Courier New', Courier, monospace;
+    padding: 10px 15px;
+    border-radius: 0px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    background-color: #c68c8c;
+    border: 2px solid rgb(110, 34, 34);
+    color: rgb(110, 34, 34);
+    position: relative;
+    min-width: 180px;
+}
+
+.toggle-button.active {
+    background-color: #ff6b6b;
+    border-color: #ff4757;
+    color: white;
+}
+
+.toggle-button:hover {
+    color: white;
+    background-color: rgb(110, 34, 34);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add this to your CSS/Account.css file */
+
+.toggle-button.shrimp-detected {
+    background-color: #ff0000;
+    border-color: #cc0000;
+    color: white;
+    animation: pulse 1s infinite;
+}
+
+.toggle-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.video-feed-container {
+    margin-top: 15px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f2f2f2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.video-feed-container h3 {
+    background-color: #ff6b6b;
+    color: white;
+    padding: 8px;
+    margin: 0;
+    text-align: center;
+}
+
+.video-feed {
+    width: 100%;
+    height: auto;
+    display: block;
+}

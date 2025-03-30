@@ -509,10 +509,76 @@ def options_video_feed():
     response.headers.add("Access-Control-Allow-Methods", "*")
     return response
 
+# Add this new route to your Flask app (paste this into your existing Flask app near the other routes)
+
+@app.route('/check_shrimp')
+def check_shrimp():
+    """
+    Endpoint to check if the head is overlapping with the shoulders.
+    Returns a JSON response indicating whether a "shrimp" pose is detected.
+    """
+    ret, frame = cap.read()
+    if not ret:
+        return jsonify({"error": "Could not capture frame"}), 500
+    
+    frame = cv2.resize(frame, (WIDTH, HEIGHT))
+    
+    img_tensor = tf.convert_to_tensor(frame)
+    input_image = tf.image.resize_with_pad(img_tensor, input_size, input_size)
+    input_image = tf.expand_dims(input_image, axis=0)
+    
+    keypoints = movenet(input_image)
+    keypoints_array = keypoints[0, 0, :, :]
+    
+    # Extract coordinates for head (nose) and shoulders
+    nose_y, nose_x, nose_conf = keypoints_array[0]  # Nose
+    l_shoulder_y, l_shoulder_x, l_shoulder_conf = keypoints_array[11]  # Left shoulder
+    r_shoulder_y, r_shoulder_x, r_shoulder_conf = keypoints_array[12]  # Right shoulder
+    
+    confidence_threshold = 0.3
+    is_shrimp = False
+    
+    # Check if keypoints are detected with sufficient confidence
+    if (nose_conf > confidence_threshold and 
+        l_shoulder_conf > confidence_threshold and 
+        r_shoulder_conf > confidence_threshold):
+        
+        # Convert normalized coordinates to pixel coordinates
+        nose_y_px = int(nose_y * HEIGHT)
+        nose_x_px = int(nose_x * WIDTH)
+        l_shoulder_y_px = int(l_shoulder_y * HEIGHT)
+        l_shoulder_x_px = int(l_shoulder_x * WIDTH)
+        r_shoulder_y_px = int(r_shoulder_y * HEIGHT)
+        r_shoulder_x_px = int(r_shoulder_x * WIDTH)
+        
+        # Calculate shoulder midpoint
+        mid_shoulder_y_px = (l_shoulder_y_px + r_shoulder_y_px) // 2
+        
+        # Check if nose is below the shoulders (Y increases downward in image coordinates)
+        # This would mean the head is overlapping with the shoulders - a "shrimp" pose
+        if nose_y_px >= mid_shoulder_y_px:
+            is_shrimp = True
+            print("SHRIMP DETECTED! Head is below shoulders.")
+    
+    response = jsonify({"isShrimp": is_shrimp})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    
+    return response
+
+@app.route('/check_shrimp', methods=['OPTIONS'])
+def options_check_shrimp():
+    response = jsonify({'status': 'success'})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    return response
+
 
 if __name__ == "__main__":
     try:
-        app.run(host='localhost', port=3003, debug=True, threaded=True)
+        app.run(host='localhost', port=8080, debug=True, threaded=True)
     except KeyboardInterrupt:
         print("\nExiting via Ctrl+C...")
     finally:
