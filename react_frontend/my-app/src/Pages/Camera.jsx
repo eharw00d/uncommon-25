@@ -55,20 +55,20 @@ const VideoFeed = () => {
       const img = imgRef.current;
       const canvas = canvasRef.current;
       if (!img || !canvas) return;
-
+  
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
+  
       try {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const pixelArray = Array.from(imageData.data);
-        console.log(pixelArray); // ✅ live pixel data
+        // console.log(pixelArray);
       } catch (err) {
-        console.warn('getImageData failed (possibly CORS)', err);
+        console.warn('getImageData failed', err);
       }
-    }, 100); // ~10fps
-
-    return () => clearInterval(interval);
+    }, 100);
+  
+    return () => clearInterval(interval); // ✅ cleanup
   }, []);
 
   return (
@@ -100,8 +100,8 @@ const VideoFeed = () => {
           <div className="camera-wrapper">
             <canvas
                 ref={canvasRef}
-                width={640}
-                height={480}
+                width={320}
+                height={240}
                 className="camera-canvas"
             />
             <video
